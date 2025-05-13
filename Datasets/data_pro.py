@@ -6,6 +6,14 @@ file_name = 'filtered_flight_data.csv'
 
 df = pd.read_csv(file_name)
 
+def remove_outliers_percentile(df, column, lower=0.01, upper=0.99):
+    lower_bound = df[column].quantile(lower)
+    upper_bound = df[column].quantile(upper)
+    return df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
+
+# 使用示例
+df = remove_outliers_percentile(df, 'ARR_DELAY')
+
 df['FL_DATE'] = pd.to_datetime(df['FL_DATE'])
 df['FL_YEAR'] = df['FL_DATE'].dt.year
 df.rename(columns={'MONTH': 'FL_MONTH', 'DAY_OF_MONTH': 'FL_DAY', 'DAY_OF_WEEK': 'FL_WEEK'}, inplace=True)
@@ -26,26 +34,22 @@ for col in encoder_columns:
     df[col] = encoder.fit_transform(df[col])
 
 categorical_columns = ['OP_CARRIER', 'OP_CARRIER_FL_NUM',
-                       'ORIGIN', 'DEST',
                        'FL_YEAR', 'FL_MONTH', 'FL_DAY', 'FL_WEEK',
                        'ORIGIN_INDEX', 'DEST_INDEX']
 
-continuous_columns = ['CRS_DEP_TIME_MIN', 'DEP_TIME_MIN', 'DEP_DELAY', 'TAXI_OUT',
-                      'WHEELS_OFF_MIN', 'WHEELS_ON_MIN',
-                      'TAXI_IN', 'CRS_ARR_TIME_MIN', 'ARR_TIME_MIN',
-                      'CRS_ELAPSED_TIME', 'ACTUAL_ELAPSED_TIME',
-                      'AIR_TIME', 'FLIGHTS',
+continuous_columns = ['CRS_DEP_TIME_MIN', 'CRS_ARR_TIME_MIN', 'CRS_ELAPSED_TIME',
+                      'FLIGHTS',
                       'O_TEMP', 'O_PRCP', 'O_WSPD', 'D_TEMP', 'D_PRCP', 'D_WSPD',
                       'O_LATITUDE', 'O_LONGITUDE', 'D_LATITUDE', 'D_LONGITUDE']
 
-target = ['ARR_DELAY']
+target = ['DEP_DELAY', 'ARR_DELAY']
 
 scaler = MinMaxScaler()
 df[continuous_columns] = scaler.fit_transform(df[continuous_columns])
 
 df = df[target + categorical_columns + continuous_columns]
 
-df.to_csv('data_processed.csv', index=False)
+df.to_csv('arr_delay_data.csv', index=False)
 
 data_info = {
     "columns_info": {
@@ -60,5 +64,5 @@ data_info = {
 }
 
 # 将数据集详细信息保存到YAML文件
-with open('columns_and_data_info.yaml', 'w') as yaml_file:
+with open('arr_delay_data_info.yaml', 'w') as yaml_file:
     yaml.dump(data_info, yaml_file, default_flow_style=False)
