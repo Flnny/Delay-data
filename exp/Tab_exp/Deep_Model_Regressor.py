@@ -60,7 +60,7 @@ for model_name, model in models.items():
     random_search = RandomizedSearchCV(
         estimator=model,
         param_distributions=param_dist,
-        n_iter=50,
+        n_iter=10,
         cv=3,
         scoring='neg_mean_squared_error',
         random_state=42
