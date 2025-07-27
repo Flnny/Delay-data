@@ -61,7 +61,7 @@ for model_name, model in models.items():
         estimator=model,
         param_distributions=param_dist,
         n_iter=50,
-        cv=5,
+        cv=3,
         scoring='neg_mean_squared_error',
         random_state=42
     )
