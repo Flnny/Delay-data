@@ -60,12 +60,12 @@ for model_name, model in models.items():
     random_search = RandomizedSearchCV(
         estimator=model,
         param_distributions=param_dist,
-        n_iter=50,
-        cv=5,
+        n_iter=10,
+        cv=3,
         scoring='neg_mean_squared_error',
         random_state=42
     )
-    fit_params = {"max_epochs": 100, "rebuild": False, "family": 'normal', "X_val": X_vaild, "y_val": y_vaild,
+    fit_params = {"max_epochs": 100, "rebuild": True, "X_val": X_vaild, "y_val": y_vaild,
                   "patience": 5}
 
     random_search.fit(X_train, y_train, **fit_params)
