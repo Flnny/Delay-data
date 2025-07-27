@@ -58,9 +58,9 @@
 - The delay propagation visualization highlights how average arrival delays flow through connected airports in the flight network—edges colored by delay indicate how upstream disruptions spread across routes in the airport graph.
 ![Delay propagation visualization](util/figures/delay_visual/delay_propagation_network.png)
 
-### Monthly Average Arrival Delay Trends (2020-2023) with COVID-19 Impact
-- This graph illustrates the monthly average arrival delay for the years 2020 to 2023, highlighting the atypical delay patterns during the COVID-19 pandemic, particularly between March and June 2020, when flight disruptions caused an abnormal trend in the data.
-![Delay propagation visualization](util/figures/monthly_arr_delay/monthly_arr_delay_2020_2023.png)
+### Monthly Average Arrival Delay Trends (2019-2022) with COVID-19 Impact
+- This graph illustrates the monthly average arrival delay for the years 2019 to 2022, highlighting the atypical delay patterns during the COVID-19 pandemic, particularly between March and June 2020, when flight disruptions caused an abnormal trend in the data.
+![Delay propagation visualization](util/figures/monthly_arr_delay/monthly_arr_delay_2019-2022.png)
 ---
 
 ## 🚧 Limitations & Future Work
