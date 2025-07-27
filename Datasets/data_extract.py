@@ -11,5 +11,4 @@ end_date = '2024-06-15'
 
 filtered_df = df[(df['FL_DATE'] >= start_date) & (df['FL_DATE'] <= end_date)]
 
-# 保存筛选后的数据
 filtered_df.to_csv('filtered_flight_data.csv', index=False)

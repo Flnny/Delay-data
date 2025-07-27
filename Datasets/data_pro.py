@@ -63,6 +63,5 @@ data_info = {
     }
 }
 
-# 将数据集详细信息保存到YAML文件
 with open('arr_delay_data_info.yaml', 'w') as yaml_file:
     yaml.dump(data_info, yaml_file, default_flow_style=False)
