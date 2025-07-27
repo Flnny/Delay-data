@@ -1,4 +1,4 @@
-# ![img.png](img.png)Delay_data: Code for Aeolus
+# ![img.png](util/img.png)Delay_data: Code for Aeolus
 
 - This repository provides the full experimental pipeline for building benchmark datasets from the “Aeolus: A Multi‑structural Flight Delay Dataset” (available on Kaggle: [mfdd‑multi‑modal‑flight‑delay‑dataset](https://www.kaggle.com/datasets/flnny123/mfddmulti-modal-flight-delay-dataset)). It demonstrates how to construct the tabular and graph-based datasets from Aeolus, run multimodal baselines, and visualize delay patterns. You can reproduce experiments across modalities and methodologies, and explore visualizations that help analyze and understand flight delay dynamics.
 ---
@@ -51,9 +51,9 @@
 ![SHAP Summary Plot](util/check/shap_beeswarm_top15.png)
 
 ### Delay propagation visualization in Flight Chains
-
-![Delay propagation visualization](util/figures/delay_visual/delay_propagation_chain.png)
 - The delay propagation visualization plots a flight chain across hub airports—with color‑coded lines showing average arrival delays—highlighting how an upstream delay travels through connections to downstream locations.
+![Delay propagation visualization](util/figures/delay_visual/delay_propagation_chain.png)
+
 ### Delay propagation visualization in Flight Networks
 - The delay propagation visualization highlights how average arrival delays flow through connected airports in the flight network—edges colored by delay indicate how upstream disruptions spread across routes in the airport graph.
 ![Delay propagation visualization](util/figures/delay_visual/delay_propagation_network.png)
