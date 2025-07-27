@@ -65,7 +65,7 @@ for model_name, model in models.items():
         scoring='neg_mean_squared_error',
         random_state=42
     )
-    fit_params = {"max_epochs": 100, "rebuild": False, "family": 'normal', "X_val": X_vaild, "y_val": y_vaild,
+    fit_params = {"max_epochs": 100, "rebuild": True, "X_val": X_vaild, "y_val": y_vaild,
                   "patience": 5}
 
     random_search.fit(X_train, y_train, **fit_params)
