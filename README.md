@@ -1,4 +1,4 @@
-# ![img.png](util/img.png)Delay_data: Code for Aeolus
+# ![img.png](util/img.png)Aeolus：A Multi-structural Flight Delay Dataset
 ![framework.png](util/framework.png)
 - This repository provides the full experimental pipeline for building benchmark datasets from the “Aeolus: A Multi‑structural Flight Delay Dataset” (available on Kaggle: [mfdd‑multi‑modal‑flight‑delay‑dataset](https://www.kaggle.com/datasets/flnny123/mfddmulti-modal-flight-delay-dataset)). It demonstrates how to construct the tabular and graph-based datasets from Aeolus, run multimodal baselines, and visualize delay patterns. You can reproduce experiments across modalities and methodologies, and explore visualizations that help analyze and understand flight delay dynamics.
 ---
