@@ -1,5 +1,5 @@
 # ![img.png](util/img.png)Delay_data: Code for Aeolus
-
+![framework.png](util/framework.png)
 - This repository provides the full experimental pipeline for building benchmark datasets from the “Aeolus: A Multi‑structural Flight Delay Dataset” (available on Kaggle: [mfdd‑multi‑modal‑flight‑delay‑dataset](https://www.kaggle.com/datasets/flnny123/mfddmulti-modal-flight-delay-dataset)). It demonstrates how to construct the tabular and graph-based datasets from Aeolus, run multimodal baselines, and visualize delay patterns. You can reproduce experiments across modalities and methodologies, and explore visualizations that help analyze and understand flight delay dynamics.
 ---
 
@@ -44,8 +44,9 @@
 
 - **Tabular baseline experiments** under `exp/Tab_exp`  
 - **Time-based modeling pipelines** under `exp/Chain_exp`
-- **Graph-based modeling pipelines** and `exp/Network_exp`
-- 
+- **Graph-based modeling pipelines** under `exp/Network_exp`
+- Some visualizations are shown below. For more visualizations, see `util/figures`
+
 ### SHAP Summary Plot
 - The SHAP summary beeswarm plot illustrates how the top‑15 features influence model predictions—each point shows an instance’s feature value and its positive or negative contribution (SHAP value) to delay prediction, with color encoding feature magnitude and horizontal position indicating impact on output
 ![SHAP Summary Plot](util/check/shap_beeswarm_top15.png)
@@ -60,7 +61,7 @@
 
 ### Monthly Average Arrival Delay Trends (2019-2022) with COVID-19 Impact
 - This graph illustrates the monthly average arrival delay for the years 2019 to 2022, highlighting the atypical delay patterns during the COVID-19 pandemic, particularly between March and June 2020, when flight disruptions caused an abnormal trend in the data.
-![Delay propagation visualization](util/figures/monthly_arr_delay/monthly_arr_delay_2019-2022.png)
+![monthly_arr_delay_2019-2022](util/figures/monthly_arr_delay/monthly_arr_delay_2019-2022.png)
 ---
 
 ## 🚧 Limitations & Future Work
