@@ -65,9 +65,9 @@ models = {
 results_df = pd.DataFrame(columns=['Model', 'AUC', 'ACC'])
 
 param_dist = {
-    'd_model': randint(32, 128),
-    'n_layers': randint(2, 10),
-    'lr': uniform(1e-5, 1e-3)
+    'd_model': [64, 128, 256],
+    'n_layers': [2, 6, 10],
+    'lr': [1e-5, 1e-4, 1e-3]
 }
 
 for model_name, model in models.items():
