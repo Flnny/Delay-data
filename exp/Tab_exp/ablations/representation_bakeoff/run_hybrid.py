@@ -20,9 +20,9 @@ from sklearn.preprocessing import KBinsDiscretizer
 EXP_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(EXP_DIR))
 
-import common  # noqa: E402
-from head.mlp_head import run_multiseed  # noqa: E402
-from huim.pattern_features import add_huim_features  # noqa: E402
+import exp.Tab_exp.ablations.representation_bakeoff.common as common  # noqa: E402
+from exp.Tab_exp.ablations.representation_bakeoff.head.mlp_head import run_multiseed  # noqa: E402
+from exp.Tab_exp.ablations.representation_bakeoff.huim.pattern_features import add_huim_features  # noqa: E402
 
 
 def pick_winner(results: pd.DataFrame, candidates) -> str:

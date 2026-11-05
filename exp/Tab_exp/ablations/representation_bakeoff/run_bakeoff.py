@@ -20,12 +20,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from exp.Tab_exp.ablations.representation_bakeoff.embeddings import embed_sentence_transformer, embed_skrub
+
 EXP_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(EXP_DIR))
 
-import common  # noqa: E402
-from head.mlp_head import run_multiseed  # noqa: E402
-from embeddings import embed_sentence_transformer, embed_skrub, embed_tabpfn  # noqa: E402
+import exp.Tab_exp.ablations.representation_bakeoff.common as common  # noqa: E402
+from exp.Tab_exp.ablations.representation_bakeoff.head.mlp_head import run_multiseed  # noqa: E402
+from exp.Tab_exp.ablations.representation_bakeoff.embeddings import embed_tabpfn  # noqa: E402
 
 REPRESENTATIONS = {
     "sentence_transformer": embed_sentence_transformer,

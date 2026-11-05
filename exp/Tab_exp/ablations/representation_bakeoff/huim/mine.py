@@ -26,7 +26,7 @@ from sklearn.preprocessing import KBinsDiscretizer
 
 EXP_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(EXP_DIR))
-import common  # noqa: E402
+import exp.Tab_exp.ablations.representation_bakeoff.common as common  # noqa: E402
 
 BIN_LABELS = {0: "VeryLow", 1: "Low", 2: "Mid", 3: "High", 4: "VeryHigh"}
 
