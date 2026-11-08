@@ -9,3 +9,4 @@ __pycache__/
 *.lock
 exp/Tab_exp/ablations/*/predictions/
 exp/Tab_exp/ablations/_ytest/
+.running__*

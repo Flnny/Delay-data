@@ -26,6 +26,7 @@ import hashlib
 import json
 import os
 import shutil
+import sys
 import tempfile
 import time
 import warnings
@@ -91,6 +92,37 @@ def _file_lock(path: Path, timeout: float = 600.0):
     finally:
         os.close(fd)
         lock.unlink(missing_ok=True)
+
+
+def _pid_alive(pid: int) -> bool:
+    try:
+        import psutil
+        return psutil.pid_exists(pid)
+    except ImportError:  # be conservative: assume alive
+        return True
+
+
+def _claim(out_dir: Path, key: dict) -> Path | None:
+    """Mark (model, seed, target, phase2_frac, extraction) as in progress so parallel
+    queues skip it. A marker left by a dead process is taken over."""
+    marker = out_dir / (".running__" + "__".join(str(key[k]) for k in SKIP_KEY))
+    for _ in range(2):
+        try:
+            fd = os.open(marker, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            os.write(fd, f"{os.getpid()} {time.strftime('%Y-%m-%d %H:%M:%S')}".encode())
+            os.close(fd)
+            return marker
+        except FileExistsError:
+            try:
+                pid = int(marker.read_text().split()[0])
+            except (OSError, ValueError, IndexError):
+                pid = -1
+            if pid > 0 and _pid_alive(pid):
+                print(f"Skipping {key['model']}: running in process {pid} ({marker.name})")
+                return None
+            print(f"Stale marker {marker.name} (pid {pid} gone): taking over")
+            marker.unlink(missing_ok=True)
+    return None
 
 
 # ── config ────────────────────────────────────────────────────────────────────
@@ -302,8 +334,13 @@ def main(arm_dir, argv=None):
     for name in r["models"]:
         key = {"model": name, "seed": seed, "target": target,
                "phase2_frac": t["phase2_frac"], "extraction": extraction}
+        # re-read every time: parallel queues may have finished this model meanwhile
+        results = pd.read_csv(results_file) if results_file.exists() else pd.DataFrame(columns=RESULT_COLUMNS)
         if len(results) and (results[SKIP_KEY].astype(str) == pd.Series(key).astype(str)).all(axis=1).any():
             print(f"Skipping {name}: {key} already in {results_file.name}")
+            continue
+        marker = _claim(out_dir, key)
+        if marker is None:
             continue
         cls, init_kw = registry[name]
         init_kw = {**init_kw, **cfg.get("preprocessing", {})}
@@ -353,6 +390,8 @@ def main(arm_dir, argv=None):
                     np.save(yf, np.asarray(y_test, dtype=np.int8))
         finally:
             shutil.rmtree(ckpt_dir, ignore_errors=True)
+            if sys.exc_info()[0] is not None:  # failing: release the claim for other queues
+                marker.unlink(missing_ok=True)
 
         auc_col = m["auc_hard"] if r["legacy_metrics"] else m["auc"]
         print(f"{name} RESULT  AUC: {auc_col:.6f}  ACC: {m['accuracy']:.6f}  F1m: {m['f1_macro']:.6f}")
@@ -370,6 +409,7 @@ def main(arm_dir, argv=None):
             cur = pd.read_csv(results_file) if results_file.exists() else pd.DataFrame(columns=RESULT_COLUMNS)
             results = pd.concat([cur, pd.DataFrame([row])], ignore_index=True)[RESULT_COLUMNS]
             results.to_csv(results_file, index=False)
+        marker.unlink(missing_ok=True)
         del model
         torch.cuda.empty_cache()
         gc.collect()
