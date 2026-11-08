@@ -339,6 +339,18 @@ def main(arm_dir, argv=None):
             model.fit(X_tr2, y_tr2, **_fit_kwargs(t, t["patience_phase2"], ckpt_dir, X_va2, y_va2, rs=seed))
             m = evaluate(model, X_test, y_test, n_classes,
                          chunk=t["predict_chunk"], batch_size=t["batch_size"])
+            proba = m.pop("proba")
+            if r.get("save_test_predictions", False):
+                # row order = df_test order (fixed by test_hash); used by paired_test.py
+                pdir = out_dir / "predictions"
+                pdir.mkdir(exist_ok=True)
+                np.save(pdir / f"{name}__s{seed}__{target}__p{t['phase2_frac']}__{extraction}.npy",
+                        proba.astype(np.float32))
+                ydir = ABLATIONS_DIR / "_ytest"
+                ydir.mkdir(exist_ok=True)
+                yf = ydir / f"{target}__{digest}.npy"
+                if not yf.exists():
+                    np.save(yf, np.asarray(y_test, dtype=np.int8))
         finally:
             shutil.rmtree(ckpt_dir, ignore_errors=True)
 

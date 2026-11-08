@@ -45,4 +45,5 @@ def evaluate(model, X_test, y_test, n_classes: int, chunk: int, batch_size: int)
         "accuracy": float(accuracy_score(y, pred)),
         "f1_macro": float(f1_score(y, pred, average="macro")),
         "auc_hard": float(auc_hard),
+        "proba": proba,  # (n_test, 1|k) — popped by the runner, saved for paired tests
     }

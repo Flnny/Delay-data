@@ -17,6 +17,8 @@ run:
   delay_threshold: 15.0
   models: [MLP, AutoInt, ResNet, FTTransformer]   # same model set for every arm
   legacy_metrics: false   # true -> `auc` column computed from hard labels (pre-fix behaviour)
+  save_test_predictions: true   # <out_dir>/predictions/*.npy (float32, ~10 MB/run, gitignored)
+                                # -> paired bootstrap / DeLong tests between arms
 
 data:
   year: 2020
