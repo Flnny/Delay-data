@@ -18,11 +18,13 @@ candidate. Candidates are drawn with sklearn's ParameterSampler and scored with
 StratifiedKFold (= what RandomizedSearchCV(cv=int) does for classifiers).
 """
 import argparse
+import contextlib
 import copy
 import dataclasses
 import gc
 import hashlib
 import json
+import os
 import shutil
 import tempfile
 import time
@@ -68,6 +70,27 @@ def _model_registry():
         "ResNet": (ResNetClassifier, {}),
         "FTTransformer": (FTTransformerClassifier, {}),
     }
+
+
+@contextlib.contextmanager
+def _file_lock(path: Path, timeout: float = 600.0):
+    """Cross-process lock via an O_EXCL lock file, so parallel runs of the same arm
+    (e.g. different extractions) cannot drop each other's results/best_params rows."""
+    lock = Path(str(path) + ".lock")
+    t0 = time.time()
+    while True:
+        try:
+            fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            break
+        except FileExistsError:
+            if time.time() - t0 > timeout:
+                raise TimeoutError(f"could not acquire {lock}; delete it if no run is active")
+            time.sleep(0.2)
+    try:
+        yield
+    finally:
+        os.close(fd)
+        lock.unlink(missing_ok=True)
 
 
 # ── config ────────────────────────────────────────────────────────────────────
@@ -301,9 +324,12 @@ def main(arm_dir, argv=None):
                 set_seed(p1_seed)
                 bp, table = run_search(cls, init_kw, grid, X_search, y_search, X_val_p1, y_val_p1,
                                        t, ckpt_dir, p1_seed)
-                best_params[pkey] = {"params": bp, "phase1_sig": sig,
-                                     "scoring": t["search_scoring"], "search": table}
-                params_file.write_text(json.dumps(best_params, indent=2, default=float))
+                entry = {"params": bp, "phase1_sig": sig, "scoring": t["search_scoring"], "search": table}
+                best_params[pkey] = entry
+                with _file_lock(params_file):  # re-read: another process may have written meanwhile
+                    cur = json.loads(params_file.read_text()) if params_file.exists() else {}
+                    cur[pkey] = entry
+                    params_file.write_text(json.dumps(cur, indent=2, default=float))
             print(f"Best params: {bp}")
 
             print(f"Phase 2: train on {len(X_tr2)} rows, early-stop on {len(X_va2)} val rows (seed {seed})")
@@ -328,8 +354,10 @@ def main(arm_dir, argv=None):
             "best_params": json.dumps(bp, default=float), "phase1_sig": sig,
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         }
-        results = pd.concat([results, pd.DataFrame([row])], ignore_index=True)[RESULT_COLUMNS]
-        results.to_csv(results_file, index=False)
+        with _file_lock(results_file):  # re-read: another process may have appended meanwhile
+            cur = pd.read_csv(results_file) if results_file.exists() else pd.DataFrame(columns=RESULT_COLUMNS)
+            results = pd.concat([cur, pd.DataFrame([row])], ignore_index=True)[RESULT_COLUMNS]
+            results.to_csv(results_file, index=False)
         del model
         torch.cuda.empty_cache()
         gc.collect()

@@ -1,0 +1,171 @@
+"""
+aggregate.py — one command for the whole ablation table (TODO items 3 + 4)
+=========================================================================
+Collects every <arm>/results.csv written by common/runner.py (results_legacy.csv is
+ignored) and writes, under ablations/aggregate/:
+
+  ablation_table.csv / .md   arm x model x extraction x target x phase2_frac:
+                             mean ± std of auc / accuracy / f1_macro over seeds
+  deltas.csv / .md           per extraction and model (seed-matched where possible):
+                             Δ SHAP selection = 02 − 01b, Δ HUIM = 03 − 02,
+                             Δ total = 03 − 01b, plus 04 − 01b
+  (both .md files are concatenated into ABLATIONS.md)
+
+Checks: all rows of a target share one test_hash (else it aborts).
+
+    uv run python exp/Tab_exp/ablations/aggregate.py [--target abs] [--phase2-frac 0.1]
+"""
+import argparse
+import sys
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / "aggregate"
+
+# display order + short labels (experiment.name -> label)
+ARMS = {
+    "baseline_matched_training": "01b all features (ref)",
+    "shap_only": "02 SHAP top-10",
+    "shap_plus_huim": "03 SHAP + HUIM",
+    "huim_only": "04 HUIM only",
+    "llm_top10": "06 LLM top-10",
+    "llm_top5_datafree": "06.1 LLM top-5 (data-free)",
+    "llm_top5_datainformed": "06.2 LLM top-5 (data-informed)",
+    "baseline_all_features": "01 all features (legacy cfg)",
+}
+MODELS = ["MLP", "AutoInt", "ResNet", "FTTransformer"]
+METRICS = ["auc", "accuracy", "f1_macro"]
+
+
+def load() -> pd.DataFrame:
+    frames = []
+    for f in sorted(HERE.glob("*/results.csv")):
+        df = pd.read_csv(f)
+        if "test_hash" not in df.columns:  # not a runner file
+            continue
+        df["source"] = f.parent.name
+        frames.append(df)
+    if not frames:
+        raise SystemExit("no results.csv from the runner found")
+    df = pd.concat(frames, ignore_index=True)
+    for tgt, g in df.groupby("target"):
+        if g["test_hash"].nunique() != 1:
+            raise SystemExit(f"target={tgt}: multiple test_hash values {g['test_hash'].unique()} — "
+                             "results are not on the same test set")
+    return df
+
+
+def fmt(m, s, n):
+    return f"{m:.4f}" if n < 2 or pd.isna(s) else f"{m:.4f} ± {s:.4f}"
+
+
+def md_table(df: pd.DataFrame) -> str:
+    cols = list(df.columns)
+    lines = ["| " + " | ".join(cols) + " |", "|" + "|".join("---" for _ in cols) + "|"]
+    lines += ["| " + " | ".join("" if pd.isna(v) else str(v) for v in r) + " |"
+              for r in df.itertuples(index=False, name=None)]
+    return "\n".join(lines)
+
+
+def summary(df: pd.DataFrame) -> pd.DataFrame:
+    keys = ["arm", "model", "extraction", "target", "phase2_frac"]
+    g = df.groupby(keys, dropna=False)
+    out = g[METRICS].agg(["mean", "std"])
+    out.columns = [f"{m}_{s}" for m, s in out.columns]
+    out["n_seeds"] = g["seed"].nunique()
+    out["seeds"] = g["seed"].apply(lambda s: ",".join(map(str, sorted(s.unique()))))
+    out = out.reset_index()
+    out["arm_order"] = out["arm"].map({a: i for i, a in enumerate(ARMS)}).fillna(99)
+    out["model_order"] = out["model"].map({m: i for i, m in enumerate(MODELS)}).fillna(99)
+    return out.sort_values(["target", "phase2_frac", "arm_order", "extraction", "model_order"]).drop(
+        columns=["arm_order", "model_order"])
+
+
+def deltas(df: pd.DataFrame) -> pd.DataFrame:
+    """Seed-matched AUC differences. 01b has no extraction; it is the reference for all."""
+    rows = []
+    exts = sorted(e for e in df["extraction"].dropna().unique()
+                  if e != "-" and not str(e).startswith("llm_"))
+    for (tgt, p2), d in df.groupby(["target", "phase2_frac"]):
+        ref = d[d.arm == "baseline_matched_training"].set_index(["model", "seed"])["auc"]
+        for ext in exts:
+            arm_auc = {a: d[(d.arm == a) & (d.extraction == ext)].set_index(["model", "seed"])["auc"]
+                       for a in ("shap_only", "shap_plus_huim", "huim_only")}
+            for model in MODELS:
+                def pair(a, b):
+                    """mean/std of a-b over seeds present in both, and n."""
+                    if a is None or b is None:
+                        return np.nan, np.nan, 0
+                    sa = a[a.index.get_level_values(0) == model].droplevel(0)
+                    sb = b[b.index.get_level_values(0) == model].droplevel(0)
+                    common = sa.index.intersection(sb.index)
+                    if len(common) == 0:
+                        return np.nan, np.nan, 0
+                    diff = sa[common] - sb[common]
+                    return diff.mean(), diff.std() if len(diff) > 1 else np.nan, len(common)
+
+                s02, s03, s04 = arm_auc["shap_only"], arm_auc["shap_plus_huim"], arm_auc["huim_only"]
+                r = {"target": tgt, "phase2_frac": p2, "extraction": ext, "model": model}
+                for name, (a, b) in {"Δ SHAP sel (02−01b)": (s02, ref), "Δ HUIM (03−02)": (s03, s02),
+                                     "Δ total (03−01b)": (s03, ref), "Δ HUIM-only (04−01b)": (s04, ref)}.items():
+                    m, s, n = pair(a, b)
+                    r[name] = np.nan if n == 0 else round(m, 4)
+                    r[name + " std"] = s
+                    r[name + " n"] = n
+                for a, col in ((ref, "AUC 01b"), (s02, "AUC 02"), (s03, "AUC 03"), (s04, "AUC 04")):
+                    v = a[a.index.get_level_values(0) == model]
+                    r[col] = round(v.mean(), 4) if len(v) else np.nan
+                if any(pd.notna(r[c]) for c in ("AUC 02", "AUC 03", "AUC 04")):
+                    rows.append(r)
+    return pd.DataFrame(rows)
+
+
+def main():
+    if hasattr(sys.stdout, "reconfigure"):  # Windows consoles default to cp125x (no "Δ", "±")
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--target")
+    ap.add_argument("--phase2-frac", type=float)
+    a = ap.parse_args()
+    df = load()
+    if a.target:
+        df = df[df.target == a.target]
+    if a.phase2_frac is not None:
+        df = df[np.isclose(df.phase2_frac, a.phase2_frac)]
+    OUT.mkdir(exist_ok=True)
+
+    s = summary(df)
+    s.to_csv(OUT / "ablation_table.csv", index=False)
+    disp = pd.DataFrame({
+        "arm": s["arm"].map(ARMS).fillna(s["arm"]), "extraction": s["extraction"],
+        "model": s["model"], "target": s["target"], "p2_frac": s["phase2_frac"],
+        **{m.upper() if m == "auc" else m: [fmt(x, y, n) for x, y, n in zip(s[f"{m}_mean"], s[f"{m}_std"], s["n_seeds"])]
+           for m in METRICS},
+        "seeds": s["seeds"],
+    })
+    d = deltas(df)
+    d.to_csv(OUT / "deltas.csv", index=False)
+
+    md = ["# Ablation results\n",
+          f"Generated by `aggregate.py` from {df['source'].nunique()} arm result files, "
+          f"{len(df)} runs. Test set hash(es): {sorted(df['test_hash'].unique())}. "
+          "Values are mean ± std over seeds (std omitted for a single seed). "
+          "AUC is computed from predicted probabilities.\n",
+          "## Arm × model\n", md_table(disp), ""]
+    if len(d):
+        show = d[["target", "phase2_frac", "extraction", "model", "AUC 01b", "AUC 02", "AUC 03", "AUC 04",
+                  "Δ SHAP sel (02−01b)", "Δ HUIM (03−02)", "Δ total (03−01b)", "Δ HUIM-only (04−01b)"]]
+        md += ["## Where does the gain come from? (seed-matched AUC deltas)\n",
+               "Δ SHAP sel isolates feature selection; Δ HUIM isolates adding the HUIM pattern "
+               "columns on top of the same SHAP features. Empty cells: that arm has not run yet.\n",
+               md_table(show), ""]
+    (OUT / "ABLATIONS.md").write_text("\n".join(md) + "\n", encoding="utf-8")
+    print("\n".join(md))
+    print(f"\nwrote {OUT}")
+
+
+if __name__ == "__main__":
+    main()
