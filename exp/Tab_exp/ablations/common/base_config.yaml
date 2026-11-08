@@ -1,0 +1,72 @@
+# Shared defaults for every mambular ablation arm (01-06).
+#
+# Merge order (later wins):
+#   common/base_config.yaml  ->  <arm>/config.yaml (experiment, features, overrides)  ->  CLI
+#
+# Arms must NOT repeat training settings here; they only describe their feature set.
+# Any deviation from these defaults goes in the arm's `overrides:` block so that a
+# plain `diff` of two arm configs shows exactly how they differ.
+
+run:
+  seed: 42                # CLI --seed. Drives model init, dataloader order, Phase-2 subsamples.
+  phase1_seed: 42         # Phase-1 search sample + RandomizedSearchCV. Fixed across seeds
+                          # so best_params.json can be frozen and reused (--reuse-params).
+  target: abs             # abs:    |ARR_DELAY| > 15           (binary, legacy definition)
+                          # late:   ARR_DELAY > 15             (binary)
+                          # 3class: early (< -15) / on-time / late (> 15)  ->  0 / 1 / 2
+  delay_threshold: 15.0
+  models: [MLP, AutoInt, ResNet]
+  legacy_metrics: false   # true -> `auc` column computed from hard labels (pre-fix behaviour)
+
+data:
+  year: 2020
+  file: "Flight_tab_2020.csv"
+  yaml_info: "data_info_2020.yaml"
+  train_days_max: 9       # FL_DAY <= 9        -> train
+  val_days_max: 12        # 9 < FL_DAY <= 12   -> val ; FL_DAY > 12 -> test (always full)
+
+training:
+  # Phase 1 — hyperparameter search
+  phase1_frac: 0.1
+  phase1_val_mode: "explicit"   # explicit: val_frac sample of val split | internal: val_size split of search sample
+  phase1_val_size: 0.5          # only used when phase1_val_mode == internal
+
+  # Phase 2 — retrain best params
+  phase2_frac: 0.1              # fraction of train split
+  val_frac: 0.1                 # fraction of VAL split used for early stopping (test is never sampled)
+
+  max_epochs: 100
+  patience_phase1: 5
+  patience_phase2: 5
+  batch_size: 2048
+  num_workers: 0
+  fast_loader: true             # batched fetch in mambular's DataLoader (common/fast_loader.py);
+                                # speed only, bit-identical outputs (common/verify_fast_loader.py)
+  row_independent_ple: true     # fix pretab PLE clamping its last threshold to the batch max
+                                # (common/pretab_patch.py). Without it a row's encoding depends
+                                # on the other rows it is predicted with.
+  predict_chunk: 100000         # test-set inference chunk (rows; rounded down to a multiple of
+                                # batch_size so GPU batches match an unchunked call). Bounds RAM.
+  precision: "16-mixed"
+  accelerator: "gpu"
+
+  # RandomizedSearchCV
+  n_iter: 10
+  cv: 3
+  search_scoring: "roc_auc"     # selection metric (roc_auc | accuracy); both are logged per candidate
+  # Same grid for every model. MLP/ResNet configs have no n_layers/width knobs of
+  # that name, so the runner maps them (see runner._materialize):
+  #   MLP:    layer_sizes = [d_model] * n_layers
+  #   ResNet: layer_sizes = [d_model] * n_layers, num_blocks = n_layers
+  d_model_options: [64, 128, 256]
+  n_layers_options: [2, 6, 10]
+  lr_options: [1.0e-5, 1.0e-4, 1.0e-3]
+
+features:
+  # FL_DAY drives the temporal split: test days (13-31) never occur in train (1-9),
+  # so as a feature it is all-unseen at test time. Used for splitting only.
+  exclude_cols: ["FLIGHTS", "FL_YEAR", "FL_MONTH", "FL_DAY"]
+  n_bins: 5                     # KBinsDiscretizer quantile bins for HUIM matching (fit on train)
+
+paths:
+  data_dir: "C:/Users/user/Desktop/tez/git/Delay-data/Datasets/Aeolus/Flight_Tab/Tab"

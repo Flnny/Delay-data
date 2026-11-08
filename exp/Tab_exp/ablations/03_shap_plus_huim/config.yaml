@@ -2,45 +2,11 @@ experiment:
   name: "shap_plus_huim"
   description: >
     Top-N SHAP features + top-K HUIM driver and protector patterns as binary features.
-    This is the main proposed method (mirrors Deep_Model_Classifier_SHAP.py).
-
-data:
-  year: 2020
-  file: "Flight_tab_2020.csv"
-  yaml_info: "data_info_2020.yaml"
-  train_days_max: 9
-  val_days_max: 12
-
-training:
-  phase1_frac: 0.1
-  phase1_val_mode: "explicit"
-  phase2_frac: 0.1
-  val_frac: 0.1
-
-  max_epochs: 100
-  patience_phase1: 5
-  patience_phase2: 5
-  batch_size: 2048
-  num_workers: 0
-  precision: "16-mixed"
-  accelerator: "gpu"
-
-  n_iter: 10
-  cv: 3
-  d_model_options: [64, 128, 256]
-  n_layers_options: [2, 6, 10]
-  lr_options: [1.0e-5, 1.0e-4, 1.0e-3]
+    This is the main proposed method.
 
 features:
   mode: "shap_plus_huim"
   top_shap_n: 10
   top_drivers_n: 20
   top_protectors_n: 20
-  n_bins: 5                     # KBinsDiscretizer bins for continuous HUIM matching
-  shap_importance_file: "../../SHAP_HUIM/shap_feature_importance.csv"
-  drivers_file: "../../SHAP_HUIM/huim_delay_drivers.csv"
-  protectors_file: "../../SHAP_HUIM/huim_delay_protectors.csv"
-  exclude_cols: ["FLIGHTS", "FL_YEAR", "FL_MONTH"]
-
-paths:
-  data_dir: "C:/Users/user/Desktop/tez/git/Delay-data/Datasets/Aeolus/Flight_Tab/Tab"
+  extraction_dir: "../../shap_huim_extractions/01_2024_baseline/csvs"

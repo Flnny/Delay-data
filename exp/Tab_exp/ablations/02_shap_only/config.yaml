@@ -4,42 +4,8 @@ experiment:
     Top-N SHAP-selected features only. No HUIM patterns.
     Isolates the contribution of SHAP feature selection vs. raw features.
 
-data:
-  year: 2020
-  file: "Flight_tab_2020.csv"
-  yaml_info: "data_info_2020.yaml"
-  train_days_max: 9
-  val_days_max: 12
-
-training:
-  # Phase 1 — hyperparameter search
-  phase1_frac: 0.1
-  phase1_val_mode: "explicit"   # uses subsampled X_val explicitly
-
-  # Phase 2 — retrain best model
-  phase2_frac: 0.1
-  val_frac: 0.1                 # fraction of val set passed to fit()
-
-  max_epochs: 100
-  patience_phase1: 5
-  patience_phase2: 5
-  batch_size: 2048
-  num_workers: 0
-  precision: "16-mixed"
-  accelerator: "gpu"
-
-  # RandomizedSearchCV
-  n_iter: 10
-  cv: 3
-  d_model_options: [64, 128, 256]
-  n_layers_options: [2, 6, 10]
-  lr_options: [1.0e-5, 1.0e-4, 1.0e-3]
-
 features:
   mode: "shap_only"
   top_shap_n: 10
-  shap_importance_file: "../../SHAP_HUIM/shap_feature_importance.csv"
-  exclude_cols: ["FLIGHTS", "FL_YEAR", "FL_MONTH"]
-
-paths:
-  data_dir: "C:/Users/user/Desktop/tez/git/Delay-data/Datasets/Aeolus/Flight_Tab/Tab"
+  # Directory holding shap_feature_importance.csv (+ HUIM CSVs). Relative to this arm dir.
+  extraction_dir: "../../shap_huim_extractions/01_2024_baseline/csvs"

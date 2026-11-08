@@ -2,44 +2,19 @@ experiment:
   name: "baseline_all_features"
   description: >
     All raw features, no SHAP selection, no HUIM.
-    2-phase training: search on 10% data, retrain on full training set.
-    Mirrors Deep_Model_Classifier_fast.py behavior.
-
-data:
-  year: 2020
-  file: "Flight_tab_2020.csv"
-  yaml_info: "data_info_2020.yaml"
-  train_days_max: 9     # FL_DAY <= 9  -> train
-  val_days_max: 12      # FL_DAY <= 12 -> val  |  FL_DAY > 12 -> test
-
-training:
-  # Phase 1 — hyperparameter search on a small fraction
-  phase1_frac: 0.1
-  phase1_val_mode: "internal"   # uses val_size internally (no explicit X_val)
-  phase1_val_size: 0.5
-
-  # Phase 2 — retrain best model (full data, matching fast.py)
-  phase2_frac: 1.0              # set < 1.0 to subsample for faster experiments
-  val_frac: 1.0                 # fraction of val set used during phase-2 monitoring
-
-  max_epochs: 100
-  patience_phase1: 5
-  patience_phase2: 3            # tighter — full data converges faster
-  batch_size: 4096
-  num_workers: 2
-  precision: "16-mixed"
-  accelerator: "gpu"
-
-  # RandomizedSearchCV
-  n_iter: 10
-  cv: 3
-  d_model_options: [64, 128, 256]
-  n_layers_options: [2, 6, 10]
-  lr_options: [1.0e-5, 1.0e-4, 1.0e-3]
+    NOTE: trained under its legacy (non-comparable) settings via `overrides` below;
+    the comparable reference arm is 01b (added in TODO item 2).
 
 features:
-  mode: "all"                   # use all raw categorical + continuous columns
-  exclude_cols: ["FLIGHTS", "FL_YEAR", "FL_MONTH"]
+  mode: "all"
 
-paths:
-  data_dir: "C:/Users/user/Desktop/tez/git/Delay-data/Datasets/Aeolus/Flight_Tab/Tab"
+# Legacy 01 training settings (differ from 02-06 — see ablation_fixes_TODO.md item 2)
+overrides:
+  training:
+    phase1_val_mode: "internal"
+    phase1_val_size: 0.5
+    phase2_frac: 1.0
+    val_frac: 1.0
+    patience_phase2: 3
+    batch_size: 4096
+    num_workers: 2

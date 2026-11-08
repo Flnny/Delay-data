@@ -9,45 +9,8 @@ experiment:
     IDENTICAL set (they differ only in ranking), so this single arm covers both.
     The variants are separated at top-5 in 06_1 / 06_2.
 
-data:
-  year: 2020
-  file: "Flight_tab_2020.csv"
-  yaml_info: "data_info_2020.yaml"
-  train_days_max: 9
-  val_days_max: 12
-
-training:
-  # Mirrors 02_shap_only / 03_shap_plus_huim exactly so results are comparable.
-  # Phase 1 — hyperparameter search
-  phase1_frac: 0.1
-  phase1_val_mode: "explicit"   # uses subsampled X_val explicitly
-
-  # Phase 2 — retrain best model
-  phase2_frac: 0.1
-  val_frac: 0.1                 # fraction of val set passed to fit()
-
-  max_epochs: 100
-  patience_phase1: 5
-  patience_phase2: 5
-  batch_size: 2048
-  num_workers: 0
-  precision: "16-mixed"
-  accelerator: "gpu"
-
-  # RandomizedSearchCV
-  n_iter: 10
-  cv: 3
-  d_model_options: [64, 128, 256]
-  n_layers_options: [2, 6, 10]
-  lr_options: [1.0e-5, 1.0e-4, 1.0e-3]
-
 features:
   mode: "llm_only"
   top_n: 10
   # Ranked Feature,LLM_Score CSV produced by ablations/05_baseline_100_data/run.py.
-  # Same shape as the SHAP importance file, so selection logic is unchanged.
   importance_file: "../05_baseline_100_data/output/llm_feature_importance_datafree.csv"
-  exclude_cols: ["FLIGHTS", "FL_YEAR", "FL_MONTH"]
-
-paths:
-  data_dir: "C:/Users/user/Desktop/tez/git/Delay-data/Datasets/Aeolus/Flight_Tab/Tab"

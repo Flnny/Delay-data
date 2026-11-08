@@ -5,3 +5,4 @@ exp/Tab_exp/ablations/*/model_checkpoints/*
 exp/Tab_exp/lightning_logs/*
 exp/Tab_exp/model_checkpoints/*
 exp/Tab_exp/representation_bakeoff/artifacts/
+__pycache__/
