@@ -1,0 +1,51 @@
+experiment:
+  name: "02_2020_train_shap_huim"
+  description: >
+    SHAP + HUIM extraction on the 2020 TRAIN split only (FL_DAY <= 9), so the
+    patterns consumed by the 2020 ablations never see validation/test days.
+    Same method and output format as 01_2024_baseline (MLP, 200 bg / 1000
+    explained rows, 5 quantile bins, shap_scale 10000, minUtil = p90).
+    Leakage-safe split INSIDE the train days:
+      FL_DAY 1..7  -> MLP fit (+ SHAP background)
+      FL_DAY 8..9  -> MLP early stopping + rows that SHAP explains
+
+data:
+  year: 2020
+  file: "Flight_tab_2020.csv"
+  yaml_info: "data_info_2020.yaml"
+  train_days_max: 9      # rows after this day are discarded right after reading the CSV
+  fit_days_max: 7        # FL_DAY <= 7 -> fit ; 7 < FL_DAY <= 9 -> early-stop / explain
+  sample_frac: 0.1       # fraction of the train split used (as in 01_2024_baseline)
+  seed: 42
+
+features:
+  # Same exclusions as ablations/common/base_config.yaml, so every ranked feature
+  # can actually be selected by the ablations (FL_DAY is split-only there).
+  exclude_cols: ["FLIGHTS", "FL_YEAR", "FL_MONTH", "FL_DAY"]
+
+mlp:                     # identical to 01_2024_baseline
+  d_model: 64
+  max_epochs: 50
+  lr: 1.0e-3
+  patience: 5
+  batch_size: 4096
+
+shap:
+  bg_samples: 200
+  test_samples: 1000
+  # label: explain model.predict (hard 0/1) — identical to 01_2024_baseline, so the
+  #        2024 vs 2020 comparison differs only in data.
+  # proba: explain P(delay) — smoother attributions (not yet used by ablations).
+  output: "label"
+
+huim:
+  n_bins: 5
+  shap_scale: 10000
+  min_util_percentile: 90
+
+outputs:
+  csvs_dir: "csvs"
+  txt_dir: "txt"
+
+paths:
+  data_dir: "C:/Users/user/Desktop/tez/git/Delay-data/Datasets/Aeolus/Flight_Tab/Tab"

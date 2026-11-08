@@ -1,0 +1,102 @@
+{
+  "config": {
+    "experiment": {
+      "name": "02_2020_train_shap_huim",
+      "description": "SHAP + HUIM extraction on the 2020 TRAIN split only (FL_DAY <= 9), so the patterns consumed by the 2020 ablations never see validation/test days. Same method and output format as 01_2024_baseline (MLP, 200 bg / 1000 explained rows, 5 quantile bins, shap_scale 10000, minUtil = p90). Leakage-safe split INSIDE the train days:\n  FL_DAY 1..7  -> MLP fit (+ SHAP background)\n  FL_DAY 8..9  -> MLP early stopping + rows that SHAP explains\n"
+    },
+    "data": {
+      "year": 2020,
+      "file": "Flight_tab_2020.csv",
+      "yaml_info": "data_info_2020.yaml",
+      "train_days_max": 9,
+      "fit_days_max": 7,
+      "sample_frac": 0.1,
+      "seed": 42
+    },
+    "features": {
+      "exclude_cols": [
+        "FLIGHTS",
+        "FL_YEAR",
+        "FL_MONTH",
+        "FL_DAY"
+      ]
+    },
+    "mlp": {
+      "d_model": 64,
+      "max_epochs": 50,
+      "lr": 0.001,
+      "patience": 5,
+      "batch_size": 4096
+    },
+    "shap": {
+      "bg_samples": 200,
+      "test_samples": 1000,
+      "output": "label"
+    },
+    "huim": {
+      "n_bins": 5,
+      "shap_scale": 10000,
+      "min_util_percentile": 90
+    },
+    "outputs": {
+      "csvs_dir": "csvs",
+      "txt_dir": "txt"
+    },
+    "paths": {
+      "data_dir": "C:/Users/user/Desktop/tez/git/Delay-data/Datasets/Aeolus/Flight_Tab/Tab"
+    }
+  },
+  "features": [
+    "OP_CARRIER",
+    "OP_CARRIER_FL_NUM",
+    "FL_WEEK",
+    "ORIGIN_INDEX",
+    "DEST_INDEX",
+    "CRS_DEP_TIME_MIN",
+    "CRS_ARR_TIME_MIN",
+    "CRS_ELAPSED_TIME",
+    "O_TEMP",
+    "O_PRCP",
+    "O_WSPD",
+    "D_TEMP",
+    "D_PRCP",
+    "D_WSPD",
+    "O_LATITUDE",
+    "O_LONGITUDE",
+    "D_LATITUDE",
+    "D_LONGITUDE"
+  ],
+  "rows": {
+    "sample": 125818,
+    "fit": 97756,
+    "early_stop": 28062,
+    "background": 200,
+    "explained": 1000
+  },
+  "fl_day_range": {
+    "fit": [
+      1,
+      7
+    ],
+    "explain": [
+      8,
+      9
+    ]
+  },
+  "mlp_early_stop_auc": 0.6139177634604815,
+  "mlp_early_stop_acc": 0.5972845841351293,
+  "n_drivers": 27942,
+  "n_protectors": 27757,
+  "min_util": {
+    "drivers": {
+      "percentile": 90,
+      "min_util": 9734
+    },
+    "protectors": {
+      "percentile": 90,
+      "min_util": 6621
+    }
+  },
+  "seconds": 1817,
+  "note": "Pattern CSVs re-sorted by numeric Utility (stable) after the run; equivalent to the int() fix now in run.py."
+}

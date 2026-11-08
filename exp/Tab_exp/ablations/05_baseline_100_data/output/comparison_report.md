@@ -1,6 +1,6 @@
 # LLM-Select vs SHAP + HUIM — feature-importance comparison
 
-Method: **LLM-Score** (taekb/llm-select) on local Ollama **qwen2.5:7b**, two prompt variants (data-free, data-informed), 3 repeats/feature. Compared against the 2024 SHAP importances and HUIM delay-driver / delay-protector itemsets.
+Method: **LLM-Score** (taekb/llm-select) on local Ollama **qwen2.5:7b**, two prompt variants (data-free, data-informed), 3 repeats/feature. Compared against the 2024 SHAP importances (01_2024_baseline) and HUIM delay-driver / delay-protector itemsets.
 
 ## 1. Per-feature comparison table
 

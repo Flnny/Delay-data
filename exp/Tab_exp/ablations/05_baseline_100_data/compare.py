@@ -22,10 +22,18 @@ Note: the SHAP/HUIM signals were mined on 2024 data while the LLM sample rows ar
 comparison is valid. See the caveats section of the report.
 
 Run:
-    uv run python exp/Tab_exp/ablations/05_baseline_100_data/compare.py
+    uv run python exp/Tab_exp/ablations/05_baseline_100_data/compare.py            # all extractions
+    uv run python exp/Tab_exp/ablations/05_baseline_100_data/compare.py --extraction 02_2020_train
+
+--extraction picks a folder under shap_huim_extractions/ (repeatable; default: every
+folder in DEFAULT_EXTRACTIONS that has csvs/). 01_2024_baseline writes to output/
+(unchanged location); any other extraction writes to output/<extraction>/. When more
+than one extraction is compared, output/extraction_summary.md puts their Spearman /
+Jaccard numbers side by side, plus SHAP-vs-SHAP agreement between the extractions.
 """
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 import matplotlib
@@ -36,9 +44,15 @@ import pandas as pd
 from scipy.stats import kendalltau, spearmanr
 
 SCRIPT_DIR = Path(__file__).parent
+LLM_DIR = SCRIPT_DIR / "output"   # run.py outputs (inputs here), fixed
 OUT_DIR = SCRIPT_DIR / "output"
 FIG_DIR = OUT_DIR / "figures"
-SHAP_HUIM_DIR = (SCRIPT_DIR / "../../shap_huim_extractions/01_2024_baseline/csvs").resolve()
+EXTRACTIONS_ROOT = (SCRIPT_DIR / "../../shap_huim_extractions").resolve()
+DEFAULT_EXTRACTIONS = ["01_2024_baseline", "02_2020_train"]
+EXTRACTION_YEAR = {"01_2024_baseline": "2024", "01_2024_v2": "2024", "02_2020_train": "2020 train days"}
+# set per extraction by run_one()
+SHAP_HUIM_DIR = EXTRACTIONS_ROOT / "01_2024_baseline" / "csvs"
+EXT_LABEL = "2024"
 
 # how many top-utility itemsets define the HUIM feature-frequency signal / get listed
 TOP_PATTERNS = 100      # for per-feature appearance frequency
@@ -87,8 +101,8 @@ def df_to_markdown(df: pd.DataFrame) -> str:
 
 # ── load ────────────────────────────────────────────────────────────────────
 def load_inputs():
-    df_free_path = OUT_DIR / "llm_feature_importance_datafree.csv"
-    df_info_path = OUT_DIR / "llm_feature_importance_datainformed.csv"
+    df_free_path = LLM_DIR / "llm_feature_importance_datafree.csv"
+    df_info_path = LLM_DIR / "llm_feature_importance_datainformed.csv"
     for p in (df_free_path, df_info_path):
         if not p.exists():
             raise FileNotFoundError(f"Missing {p}. Run run.py first.")
@@ -158,7 +172,7 @@ def make_figures(df: pd.DataFrame):
             ax.annotate(r["Feature"], (r["SHAP_mean_abs"], r[col]),
                         fontsize=7, alpha=0.8)
         rho = spearmanr(sub["SHAP_mean_abs"], sub[col])[0]
-        ax.set_xlabel("SHAP Mean|SHAP| (2024)")
+        ax.set_xlabel(f"SHAP Mean|SHAP| ({EXT_LABEL})")
         ax.set_ylabel(col)
         ax.set_title(f"{title}\nSpearman rho = {rho:.2f}")
     fig.tight_layout()
@@ -238,7 +252,8 @@ def write_report(df, drivers, protectors):
     md.append("# LLM-Select vs SHAP + HUIM — feature-importance comparison\n")
     md.append("Method: **LLM-Score** (taekb/llm-select) on local Ollama "
               "**qwen2.5:7b**, two prompt variants (data-free, data-informed), "
-              "3 repeats/feature. Compared against the 2024 SHAP importances and "
+              f"3 repeats/feature. Compared against the {EXT_LABEL} SHAP importances "
+              f"({SHAP_HUIM_DIR.parent.name}) and "
               "HUIM delay-driver / delay-protector itemsets.\n")
 
     md.append("## 1. Per-feature comparison table\n")
@@ -278,10 +293,14 @@ def write_report(df, drivers, protectors):
     md.append(itemset_block("Delay protectors", protectors["Pattern"], protectors["Utility"], llm_scores))
 
     md.append("## 6. Caveats\n")
-    md.append("- **Year mismatch:** SHAP/HUIM were mined on 2024 data; the LLM "
-              "sample rows are 2020. Feature semantics are year-independent, so "
-              "the feature-level comparison holds, but exact magnitudes are not "
-              "strictly aligned.")
+    if "2024" in EXT_LABEL:
+        md.append("- **Year mismatch:** SHAP/HUIM were mined on 2024 data; the LLM "
+                  "sample rows are 2020. Feature semantics are year-independent, so "
+                  "the feature-level comparison holds, but exact magnitudes are not "
+                  "strictly aligned.")
+    else:
+        md.append(f"- SHAP/HUIM were mined on {EXT_LABEL} only (no val/test days), "
+                  "the same year as the LLM sample rows and the ablations.")
     md.append("- **Small local model:** qwen2.5:7b is far weaker than the paper's "
               "GPT-4; treat LLM scores as a directional signal (3 repeats + std "
               "quantify run-to-run variance).")
@@ -291,23 +310,74 @@ def write_report(df, drivers, protectors):
     (OUT_DIR / "comparison_report.md").write_text("\n".join(md), encoding="utf-8")
 
 
-def main():
+def run_one(ext: str) -> dict:
+    """Full comparison for one extraction; returns headline numbers."""
+    global SHAP_HUIM_DIR, OUT_DIR, FIG_DIR, EXT_LABEL
+    SHAP_HUIM_DIR = EXTRACTIONS_ROOT / ext / "csvs"
+    EXT_LABEL = EXTRACTION_YEAR.get(ext, ext)
+    OUT_DIR = SCRIPT_DIR / "output" if ext == "01_2024_baseline" else SCRIPT_DIR / "output" / ext
+    FIG_DIR = OUT_DIR / "figures"
+
     llm_free, llm_info, shap, drivers, protectors = load_inputs()
     df = build_table(llm_free, llm_info, shap, drivers, protectors)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     df.to_csv(OUT_DIR / "comparison.csv", index=False)
-    print(f"Wrote {OUT_DIR / 'comparison.csv'}")
-
+    print(f"[{ext}] Wrote {OUT_DIR / 'comparison.csv'}")
     make_figures(df)
-    print(f"Wrote figures -> {FIG_DIR}")
-
     write_report(df, drivers, protectors)
-    print(f"Wrote {OUT_DIR / 'comparison_report.md'}")
+    print(f"[{ext}] Wrote {OUT_DIR / 'comparison_report.md'} + figures")
 
-    print("\nComparison summary:")
-    print(df[["Feature", "LLM_datafree", "LLM_datainformed",
-              "SHAP_mean_abs", "SHAP_rank"]].to_string(index=False))
+    rho_f, tau_f = corr_line(df, "LLM_datafree")
+    rho_i, tau_i = corr_line(df, "LLM_datainformed")
+    shap_top = top_k_set(df, "SHAP_mean_abs")
+    return {
+        "extraction": ext, "data": EXT_LABEL,
+        "rho_datafree": rho_f, "tau_datafree": tau_f,
+        "rho_datainformed": rho_i, "tau_datainformed": tau_i,
+        "jaccard_datafree": jaccard(top_k_set(df, "LLM_datafree"), shap_top),
+        "jaccard_datainformed": jaccard(top_k_set(df, "LLM_datainformed"), shap_top),
+        "shap_top": sorted(shap_top),
+        "shap": shap.set_index("Feature")["SHAP_mean_abs"],
+    }
+
+
+def write_summary(results: list[dict]):
+    out = SCRIPT_DIR / "output"
+    rows = [{k: (round(v, 3) if isinstance(v, float) else v) for k, v in r.items()
+             if k not in ("shap", "shap_top")} for r in results]
+    md = ["# LLM-Select vs SHAP — per-extraction summary\n",
+          f"Top-{TOP_K} Jaccard is LLM top-{TOP_K} vs SHAP top-{TOP_K}.\n",
+          df_to_markdown(pd.DataFrame(rows)), "",
+          "## SHAP agreement between extractions\n"]
+    for i in range(len(results)):
+        for j in range(i + 1, len(results)):
+            a, b = results[i], results[j]
+            common = a["shap"].index.intersection(b["shap"].index)
+            rho = spearmanr(a["shap"][common], b["shap"][common])[0]
+            ta, tb = set(a["shap_top"]), set(b["shap_top"])
+            md.append(f"- **{a['extraction']} vs {b['extraction']}**: Spearman rho = {rho:.3f} "
+                      f"over {len(common)} shared features; top-{TOP_K} Jaccard = {jaccard(ta, tb):.2f}")
+            md.append(f"  - only in {a['extraction']}: {sorted(ta - tb)}")
+            md.append(f"  - only in {b['extraction']}: {sorted(tb - ta)}")
+    (out / "extraction_summary.md").write_text("\n".join(md) + "\n", encoding="utf-8")
+    pd.DataFrame(rows).to_csv(out / "extraction_summary.csv", index=False)
+    print(f"Wrote {out / 'extraction_summary.md'}")
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--extraction", action="append",
+                    help="folder under shap_huim_extractions/ (repeatable)")
+    args = ap.parse_args()
+    exts = args.extraction or [e for e in DEFAULT_EXTRACTIONS
+                               if (EXTRACTIONS_ROOT / e / "csvs" / "shap_feature_importance.csv").exists()]
+    results = [run_one(e) for e in exts]
+    if len(results) > 1:
+        write_summary(results)
+    for r in results:
+        print(f"{r['extraction']:>18}: rho free/informed = {r['rho_datafree']:.3f}/{r['rho_datainformed']:.3f}  "
+              f"Jaccard free/informed = {r['jaccard_datafree']:.2f}/{r['jaccard_datainformed']:.2f}")
 
 
 if __name__ == "__main__":
