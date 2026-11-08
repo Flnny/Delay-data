@@ -8,8 +8,12 @@
 
 ## `exp/Tab_exp/` — tabular experiments (the actively developed area)
 - `Deep_Model_Classifier.py` / `Deep_Model_Regressor.py` / `Deep_Model_LSS.py` — standalone benchmarks of all `mambular` models for classification / regression / distributional tasks.
-- `ablations/` — four feature-set ablations (`01_baseline_all_features`, `02_shap_only`, `03_shap_plus_huim`, `04_huim_only`), each `config.yaml` + `run.py` + `results.csv`.
-- `shap_huim_extractions/` — the SHAP+HUIM mining pipeline. `01_2024_baseline/` and `01_2024_v2/` are variants; each writes `csvs/`, `txt/`, `figures/`.
+- `ablations/` — feature-set ablations on 2020, all driven by `ablations/common/` (shared seeded runner, see its README):
+  - `01b_baseline_matched_training` (reference: all features), `01_baseline_all_features` (same features, legacy training overrides), `02_shap_only`, `03_shap_plus_huim` (proposed), `04_huim_only`, `06_llm_top10`, `06_1_llm_top5_datafree`, `06_2_llm_top5_datainformed` (LLM-Select rankings from `05_baseline_100_data/`).
+  - Each arm: `config.yaml` + thin `run.py` → `results.csv`, `best_params.json`, `predictions/`; pre-runner outputs kept as `*_legacy.*`.
+  - `aggregate.py` → `aggregate/ABLATIONS.md` (mean ± std over seeds, Δ table); `paired_test.py` → paired DeLong tests.
+  - `representation_bakeoff/`, `skrub_head_ablation/` — separate representation experiments (own configs, not the runner).
+- `shap_huim_extractions/` — SHAP+HUIM mining: `01_2024_baseline/` (+ variant `01_2024_v2/`), `02_2020_train/` (2020 train days only); each writes `csvs/`, `txt/`.
 
 ## `util/` — analysis & figures
 - `check/shap_check.py` — recompute SHAP global feature-importance ranking.
