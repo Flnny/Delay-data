@@ -23,7 +23,9 @@ uv run python exp/Tab_exp/ablations/03_shap_plus_huim/run.py --seed 42
 | `runner.py` | CLI, Phase 1 search, Phase 2 retrain, `best_params.json`, `results.csv` |
 | `fast_loader.py` | batched DataLoader fetch for mambular (speed only) |
 | `pretab_patch.py` | row-independent PLE transform (bug fix, see below) |
+| `mambular_patch.py` | batch-first attention for mambular's transformer layer (FT bug fix, see below) |
 | `verify_fast_loader.py` | proves `fast_loader` + chunked inference are bit-identical |
+| `check_configs.py` | diffs the resolved configs of all arms (item 2 acceptance) |
 
 `results.csv` columns: `arm, model, seed, target, phase2_frac, n_train, n_val, n_test,
 test_pos_rate, test_hash, auc, accuracy, f1_macro` + `auc_hard, extraction, n_features,
@@ -58,10 +60,22 @@ arm whose test rows differ raises `RuntimeError`.
    (max diff 47 in the self-test). `pretab_patch` keeps fitted thresholds; it is
    bit-identical to the original whenever the clamp does not fire
    (`python -m common.pretab_patch`).
+9. mambular's `CustomTransformerEncoderLayer` (FTTransformer) leaves PyTorch's
+   `batch_first=False` while its input is `(batch, features, d_model)`, so attention
+   ran across the ROWS of each mini-batch. Memory was O(batch²) (FT OOMs on 16 GB at
+   batch 2048) and predictions depended on batch-mates (max |Δp| 0.02 when re-chunking).
+   `mambular_patch` makes it batch-first: Δp 3e-5 (TF32 noise, same as the other
+   models), peak memory 1083 → 284 MiB (`python -m common.mambular_patch`).
+10. Label-encoded categoricals are always categorical for mambular
+   (`preprocessing.cat_cutoff`): pretab's ratio rule made `OP_CARRIER_FL_NUM`
+   numerical on 10% samples and categorical on full train.
+11. FTTransformer is in the default model set of every arm.
 
 ## Verification (TODO item 0)
 
 Acceptance run: 01 and 03, seed 42, MLP, `training.n_iter=2`, each twice.
+Produced at commit `b2046a9` (before items 10-11 above changed the column types,
+so the current code gives different absolute AUCs; the repeat-identity property holds).
 
 | arm | AUC run a | AUC run b | test_hash |
 |---|---|---|---|

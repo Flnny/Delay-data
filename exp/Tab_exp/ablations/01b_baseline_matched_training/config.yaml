@@ -1,0 +1,9 @@
+experiment:
+  name: "baseline_matched_training"
+  description: >
+    All raw features (same feature set as 01), trained with the shared settings
+    of 02-06 (no overrides). This is the reference arm for every comparison;
+    01 stays only to document the legacy, non-comparable configuration.
+
+features:
+  mode: "all"

@@ -38,7 +38,7 @@ from sklearn.model_selection import ParameterSampler, StratifiedKFold
 
 from .seeding import set_seed
 from . import data as D
-from . import fast_loader, pretab_patch
+from . import fast_loader, mambular_patch, pretab_patch
 from .features import build_features
 from .metrics import evaluate, positive_scores
 
@@ -184,7 +184,9 @@ def phase1_signature(cfg: dict, model_name: str, extraction: str) -> str:
             "d_model_options", "n_layers_options", "lr_options"]
     sig = {k: t.get(k) for k in keys}
     sig.update(model=model_name, target=cfg["run"]["target"], phase1_seed=cfg["run"]["phase1_seed"],
-               features=cfg["features"], extraction=extraction, data=cfg["data"])
+               features=cfg["features"], extraction=extraction, data=cfg["data"],
+               preprocessing=cfg.get("preprocessing", {}),
+               patches={k: t.get(k) for k in ("row_independent_ple", "batch_first_attention")})
     return hashlib.sha256(json.dumps(sig, sort_keys=True, default=str).encode()).hexdigest()[:12]
 
 
@@ -235,6 +237,8 @@ def main(arm_dir, argv=None):
         fast_loader.enable()
     if t.get("row_independent_ple", False):
         pretab_patch.enable()
+    if t.get("batch_first_attention", False):
+        mambular_patch.enable()
 
     # data + features (deterministic, no RNG involved)
     df_train, df_val, df_test, cat_cols, cont_cols, schema = D.load_splits(cfg)
@@ -279,6 +283,7 @@ def main(arm_dir, argv=None):
             print(f"Skipping {name}: {key} already in {results_file.name}")
             continue
         cls, init_kw = registry[name]
+        init_kw = {**init_kw, **cfg.get("preprocessing", {})}
         grid = _grid(t)
         sig = phase1_signature(cfg, name, extraction)
         pkey = f"{name}|{target}|{extraction}"

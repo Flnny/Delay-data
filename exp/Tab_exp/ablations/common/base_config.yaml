@@ -15,7 +15,7 @@ run:
                           # late:   ARR_DELAY > 15             (binary)
                           # 3class: early (< -15) / on-time / late (> 15)  ->  0 / 1 / 2
   delay_threshold: 15.0
-  models: [MLP, AutoInt, ResNet]
+  models: [MLP, AutoInt, ResNet, FTTransformer]   # same model set for every arm
   legacy_metrics: false   # true -> `auc` column computed from hard labels (pre-fix behaviour)
 
 data:
@@ -45,6 +45,9 @@ training:
   row_independent_ple: true     # fix pretab PLE clamping its last threshold to the batch max
                                 # (common/pretab_patch.py). Without it a row's encoding depends
                                 # on the other rows it is predicted with.
+  batch_first_attention: true   # fix mambular's transformer layer attending across the ROWS of a
+                                # batch instead of the feature tokens (common/mambular_patch.py).
+                                # Affects FTTransformer; AutoInt/MLP/ResNet are unaffected.
   predict_chunk: 100000         # test-set inference chunk (rows; rounded down to a multiple of
                                 # batch_size so GPU batches match an unchunked call). Bounds RAM.
   precision: "16-mixed"
@@ -61,6 +64,14 @@ training:
   d_model_options: [64, 128, 256]
   n_layers_options: [2, 6, 10]
   lr_options: [1.0e-5, 1.0e-4, 1.0e-3]
+
+preprocessing:
+  # Passed to every mambular model (pretab Preprocessor). pretab treats an int column
+  # as categorical only if n_unique/n_rows < cat_cutoff (default 0.03), so the type of
+  # OP_CARRIER_FL_NUM flipped with the sample size (numerical on 10% samples,
+  # categorical on full train). An int cutoff this large makes every label-encoded
+  # (int64) column categorical and every float column numerical, for all sample sizes.
+  cat_cutoff: 1000000000
 
 features:
   # FL_DAY drives the temporal split: test days (13-31) never occur in train (1-9),
