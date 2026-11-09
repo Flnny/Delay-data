@@ -36,7 +36,7 @@ ARMS = {
     "llm_top5_datainformed": "06.2 LLM top-5 (data-informed)",
     "baseline_all_features": "01 all features (legacy cfg)",
 }
-MODELS = ["MLP", "AutoInt", "ResNet", "FTTransformer"]
+MODELS = ["MLP", "AutoInt", "ResNet", "FTTransformer", "LightGBM", "XGBoost", "CatBoost"]
 METRICS = ["auc", "accuracy", "f1_macro"]
 
 
@@ -82,6 +82,26 @@ def summary(df: pd.DataFrame) -> pd.DataFrame:
     out["model_order"] = out["model"].map({m: i for i, m in enumerate(MODELS)}).fillna(99)
     return out.sort_values(["target", "phase2_frac", "arm_order", "extraction", "model_order"]).drop(
         columns=["arm_order", "model_order"])
+
+
+def pivot(s: pd.DataFrame) -> pd.DataFrame:
+    """Rows: feature set (arm + extraction); columns: models; cells: AUC mean ± std, best in bold."""
+    rows = []
+    multi = s["target"].nunique() > 1 or s["phase2_frac"].nunique() > 1
+    for (tgt, p2, arm, ext), g in s.groupby(["target", "phase2_frac", "arm", "extraction"], sort=False):
+        name = ARMS.get(arm, arm)
+        if ext != "-" and not str(ext).startswith("llm_"):
+            name += f" [{ext}]"
+        r = {"feature set": name}
+        if multi:
+            r["target/p2"] = f"{tgt}/{p2}"
+        best = g.loc[g["auc_mean"].idxmax(), "model"]
+        for m in MODELS:
+            x = g[g.model == m]
+            cell = fmt(x.auc_mean.iloc[0], x.auc_std.iloc[0], x.n_seeds.iloc[0]) if len(x) else ""
+            r[m] = f"**{cell}**" if cell and m == best else cell
+        rows.append(r)
+    return pd.DataFrame(rows)
 
 
 def deltas(df: pd.DataFrame) -> pd.DataFrame:
@@ -154,7 +174,10 @@ def main():
           f"{len(df)} runs. Test set hash(es): {sorted(df['test_hash'].unique())}. "
           "Values are mean ± std over seeds (std omitted for a single seed). "
           "AUC is computed from predicted probabilities.\n",
-          "## Arm × model\n", md_table(disp), ""]
+          "## Side by side: AUC per feature set (rows) and model (columns)\n",
+          "mean ± std over seeds; **bold** = best model for that feature set.\n",
+          md_table(pivot(s)), "",
+          "## Arm × model (all metrics)\n", md_table(disp), ""]
     if len(d):
         show = d[["target", "phase2_frac", "extraction", "model", "AUC 01b", "AUC 02", "AUC 03", "AUC 04",
                   "Δ SHAP sel (02−01b)", "Δ HUIM (03−02)", "Δ total (03−01b)", "Δ HUIM-only (04−01b)"]]
@@ -162,6 +185,10 @@ def main():
                "Δ SHAP sel isolates feature selection; Δ HUIM isolates adding the HUIM pattern "
                "columns on top of the same SHAP features. Empty cells: that arm has not run yet.\n",
                md_table(show), ""]
+    bake = HERE / "representation_bakeoff" / "RESULTS_GBDT.md"
+    if bake.exists():
+        body = bake.read_text(encoding="utf-8").split("\n", 1)[1]
+        md += ["## Representation bake-off (50k sample, all years) incl. TabFM head\n", body]
     (OUT / "ABLATIONS.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     print("\n".join(md))
     print(f"\nwrote {OUT}")
