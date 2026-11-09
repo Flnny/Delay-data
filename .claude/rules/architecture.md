@@ -12,7 +12,7 @@
   - `01b_baseline_matched_training` (reference: all features), `01_baseline_all_features` (same features, legacy training overrides), `02_shap_only`, `03_shap_plus_huim` (proposed), `04_huim_only`, `06_llm_top10`, `06_1_llm_top5_datafree`, `06_2_llm_top5_datainformed` (LLM-Select rankings from `05_baseline_100_data/`).
   - Each arm: `config.yaml` + thin `run.py` → `results.csv`, `best_params.json`, `predictions/`; pre-runner outputs kept as `*_legacy.*`.
   - `aggregate.py` → `aggregate/ABLATIONS.md` (mean ± std over seeds, Δ table); `paired_test.py` → paired DeLong tests.
-  - `representation_bakeoff/`, `skrub_head_ablation/` — separate representation experiments (own configs, not the runner).
+  - `representation/` — representation ablation on a 50k all-years sample (own configs, not the runner): `bakeoff/` (embeddings x fixed MLP head, GBDT rows) and `skrub_head/` (skrub + TabFM head, Colab notebook). See `representation/README.md`.
 - `shap_huim_extractions/` — SHAP+HUIM mining: `01_2024_baseline/` (+ variant `01_2024_v2/`), `02_2020_train/` (2020 train days only); each writes `csvs/`, `txt/`.
 
 ## `util/` — analysis & figures

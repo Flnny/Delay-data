@@ -11,7 +11,7 @@ context is re-attended for each batch). Downloads model weights on first run.
 """
 import numpy as np
 
-from exp.Tab_exp.ablations.representation_bakeoff.common import encode_numeric
+from exp.Tab_exp.ablations.representation.bakeoff.common import encode_numeric
 
 
 def build(df, cat, cont, train_mask, y, cfg) -> np.ndarray:

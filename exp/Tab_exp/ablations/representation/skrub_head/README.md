@@ -1,6 +1,6 @@
 # Skrub + TabFM Head
 
-Follow-up to `../representation_bakeoff/`. The bake-off fed one fixed MLP head with different
+Follow-up to `../bakeoff/`. The bake-off fed one fixed MLP head with different
 representations, and **skrub `TableVectorizer` won** (test AUC 0.5982 ± 0.0014). This experiment
 keeps the skrub representation and **replaces the MLP head with TabFM**.
 
@@ -21,7 +21,7 @@ Only the head differs, so the comparison is head against head.
 - **Representation:** skrub `TableVectorizer(cardinality_threshold=40)` + `StandardScaler`, both fit on train only. The result has 95 dimensions.
 - **Metrics:** test AUC (primary), F1-macro and accuracy, as mean ± std over seeds `[42, 43, 44]`.
 
-The MLP is not re-run. Its numbers come from `representation_bakeoff/results.csv` (row `skrub`).
+The MLP is not re-run. Its numbers come from `../bakeoff/results.csv` (row `skrub`).
 
 ## TabFM head
 
@@ -62,8 +62,8 @@ Colab, Kaggle or a remote box.
    ```
    You also need pandas, scikit-learn, pyarrow and pyyaml.
 2. **Get the sample.** Build it once with
-   `uv run python exp/Tab_exp/representation_bakeoff/prep/build_sample.py`, which writes
-   `representation_bakeoff/artifacts/sample.parquet`. Copy it to the run machine and set
+   `uv run python exp/Tab_exp/ablations/representation/bakeoff/prep/build_sample.py`, which writes
+   `../bakeoff/artifacts/sample.parquet`. Copy it to the run machine and set
    `SAMPLE_PATH` in the config cell. The default is a Google Drive path. Off Colab, skip the
    `drive.mount` cell. If you set `TAB_DIR` instead (the folder with `Flight_tab_YYYY.csv` and
    `data_info_YYYY.yaml` for 2016–2024), the notebook rebuilds the identical sample itself.

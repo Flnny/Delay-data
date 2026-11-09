@@ -185,7 +185,7 @@ def main():
                "Δ SHAP sel isolates feature selection; Δ HUIM isolates adding the HUIM pattern "
                "columns on top of the same SHAP features. Empty cells: that arm has not run yet.\n",
                md_table(show), ""]
-    bake = HERE / "representation_bakeoff" / "RESULTS_GBDT.md"
+    bake = HERE / "representation" / "bakeoff" / "RESULTS_GBDT.md"
     if bake.exists():
         body = bake.read_text(encoding="utf-8").split("\n", 1)[1]
         md += ["## Representation bake-off (50k sample, all years) incl. TabFM head\n", body]

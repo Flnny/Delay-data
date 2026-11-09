@@ -22,7 +22,7 @@ below are 2020, target `abs`, `phase2_frac` 0.1, as of the shared-runner reruns.
 - **Noise:** seed-to-seed std is 0.001–0.010 AUC; the DeLong SE on 2.5M test rows is ~0.0002.
   Training noise dominates, so per-seed DeLong p-values overstate significance — judge
   differences against the seed std (and sign consistency across seeds).
-- Bake-off (50k sample, all years, `representation_bakeoff/RESULTS_GBDT.md`): skrub + TabFM
+- Bake-off (50k sample, all years, `representation/bakeoff/RESULTS_GBDT.md`): skrub + TabFM
   0.6336 ≫ raw + CatBoost 0.6009 ≈ skrub + LightGBM 0.5994 ≈ skrub + MLP 0.5982 > skrub + HUIM 0.5919.
 - Checkpoints are temporary (deleted after each run); predictions live in
   `<arm>/predictions/` (gitignored).

@@ -13,15 +13,15 @@ head / split / sample / seeds / metric are identical across every row.
 
 ```bash
 # 0. Prep (one-time; heavy) — process all raw years, then draw the fixed sample
-uv run python exp/Tab_exp/representation_bakeoff/prep/build_tab_years.py
-uv run python exp/Tab_exp/representation_bakeoff/prep/build_sample.py
+uv run python exp/Tab_exp/ablations/representation/bakeoff/prep/build_tab_years.py
+uv run python exp/Tab_exp/ablations/representation/bakeoff/prep/build_sample.py
 
 # 1. Bake-off: A=sentence_transformer, B=skrub, C=tabpfn  -> results.csv
-uv run python exp/Tab_exp/representation_bakeoff/run_bakeoff.py
+uv run python exp/Tab_exp/ablations/representation/bakeoff/run_bakeoff.py
 
 # 2. HUIM hybrid (D): mine delay-cost patterns, add to the winner
-uv run python exp/Tab_exp/representation_bakeoff/huim/mine.py
-uv run python exp/Tab_exp/representation_bakeoff/run_hybrid.py
+uv run python exp/Tab_exp/ablations/representation/bakeoff/huim/mine.py
+uv run python exp/Tab_exp/ablations/representation/bakeoff/run_hybrid.py
 ```
 
 All knobs live in `config.yaml`. Artifacts (sample, cached embeddings, HUIM

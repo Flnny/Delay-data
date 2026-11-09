@@ -9,8 +9,8 @@ Each representation's matrix is cached to artifacts/emb_<name>.npy so the HUIM
 hybrid (run_hybrid.py) can reuse the winner without recomputing.
 
 Run (after prep):
-    uv run python exp/Tab_exp/representation_bakeoff/run_bakeoff.py
-    uv run python exp/Tab_exp/representation_bakeoff/run_bakeoff.py --only skrub
+    uv run python exp/Tab_exp/ablations/representation/bakeoff/run_bakeoff.py
+    uv run python exp/Tab_exp/ablations/representation/bakeoff/run_bakeoff.py --only skrub
 """
 import argparse
 import sys
@@ -20,14 +20,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from exp.Tab_exp.ablations.representation_bakeoff.embeddings import embed_sentence_transformer, embed_skrub
+from exp.Tab_exp.ablations.representation.bakeoff.embeddings import embed_sentence_transformer, embed_skrub
 
 EXP_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(EXP_DIR))
 
-import exp.Tab_exp.ablations.representation_bakeoff.common as common  # noqa: E402
-from exp.Tab_exp.ablations.representation_bakeoff.head.mlp_head import run_multiseed  # noqa: E402
-from exp.Tab_exp.ablations.representation_bakeoff.embeddings import embed_tabpfn  # noqa: E402
+import exp.Tab_exp.ablations.representation.bakeoff.common as common  # noqa: E402
+from exp.Tab_exp.ablations.representation.bakeoff.head.mlp_head import run_multiseed  # noqa: E402
+from exp.Tab_exp.ablations.representation.bakeoff.embeddings import embed_tabpfn  # noqa: E402
 
 REPRESENTATIONS = {
     "sentence_transformer": embed_sentence_transformer,

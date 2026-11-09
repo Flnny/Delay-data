@@ -35,7 +35,7 @@ artifacts/sample.parquet   50k rows | tr 14,690 / val 4,985 / test 30,325 | 40.8
              results.csv  (row D)
 ```
 
-## Components built (`exp/Tab_exp/representation_bakeoff/`)
+## Components built (`exp/Tab_exp/ablations/representation/bakeoff/`)
 
 | File | Role |
 |---|---|
@@ -98,11 +98,11 @@ consistent with the repo's other tabular baselines.
 ## Reproduce
 
 ```bash
-uv run python exp/Tab_exp/representation_bakeoff/prep/build_tab_years.py   # once (heavy)
-uv run python exp/Tab_exp/representation_bakeoff/prep/build_sample.py
-uv run python exp/Tab_exp/representation_bakeoff/run_bakeoff.py
-uv run python exp/Tab_exp/representation_bakeoff/huim/mine.py
-uv run python exp/Tab_exp/representation_bakeoff/run_hybrid.py
+uv run python exp/Tab_exp/ablations/representation/bakeoff/prep/build_tab_years.py   # once (heavy)
+uv run python exp/Tab_exp/ablations/representation/bakeoff/prep/build_sample.py
+uv run python exp/Tab_exp/ablations/representation/bakeoff/run_bakeoff.py
+uv run python exp/Tab_exp/ablations/representation/bakeoff/huim/mine.py
+uv run python exp/Tab_exp/ablations/representation/bakeoff/run_hybrid.py
 ```
 
 Artifacts (`sample.parquet`, `emb_*.npy`, HUIM files) land in `artifacts/` (gitignored).

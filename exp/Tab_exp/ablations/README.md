@@ -20,7 +20,7 @@ GBDT baselines (LightGBM, XGBoost, CatBoost). All arms run through one seeded ru
 
 Results: `aggregate/ABLATIONS.md` (mean ± std over seeds 42/43/44, Δ tables) and
 `aggregate/paired_tests.md` (paired DeLong tests). Representation bake-off (50k sample,
-all years): `representation_bakeoff/RESULTS_GBDT.md`.
+all years): `representation/bakeoff/RESULTS_GBDT.md`.
 
 ## How to reproduce
 
@@ -61,8 +61,8 @@ uv run python $A/paired_test.py        # -> aggregate/paired_tests.md
 uv run python $A/common/check_configs.py   # arms differ only in their feature set?
 
 # 6. Bake-off GBDT rows (rebuilds the 50k sample if artifacts/ is missing)
-uv run python $A/representation_bakeoff/prep/build_sample.py
-uv run python $A/representation_bakeoff/run_gbdt.py
+uv run python $A/representation/bakeoff/prep/build_sample.py
+uv run python $A/representation/bakeoff/run_gbdt.py
 ```
 
 Notes:

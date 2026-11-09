@@ -3,7 +3,7 @@
 Reads ``results.csv`` (and the mined HUIM patterns for the caption) and writes a
 light and a dark PNG into ``figures/``:
 
-    uv run python exp/Tab_exp/representation_bakeoff/make_figures.py
+    uv run python exp/Tab_exp/ablations/representation/bakeoff/make_figures.py
 
 Paths resolve relative to this file, so it can be launched from anywhere.
 """

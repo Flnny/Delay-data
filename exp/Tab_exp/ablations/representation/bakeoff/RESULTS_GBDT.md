@@ -1,6 +1,6 @@
 # Bake-off with GBDT rows
 
-50k sample, split 14690/4985/30325, seeds [42, 43, 44]; mean ± std over seeds. GBDTs use one fixed configuration with early stopping on validation AUC (no search, like the fixed MLP head). The TabFM row is copied from `../skrub_head_ablation/README.md`.
+50k sample, split 14690/4985/30325, seeds [42, 43, 44]; mean ± std over seeds. GBDTs use one fixed configuration with early stopping on validation AUC (no search, like the fixed MLP head). The TabFM row is copied from `../skrub_head/README.md`.
 
 | Representation / head | dim | AUC | F1-macro | Accuracy |
 |---|---|---|---|---|

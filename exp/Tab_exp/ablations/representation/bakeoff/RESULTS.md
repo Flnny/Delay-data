@@ -11,7 +11,7 @@ AUC primary + F1-macro + accuracy, mean ± std over seeds `[42,43,44]`.
 ![Representation bake-off results](figures/bakeoff_results.png)
 
 Regenerate the figure (light + dark PNGs into `figures/`) after any re-run:
-`uv run python exp/Tab_exp/representation_bakeoff/make_figures.py`
+`uv run python exp/Tab_exp/ablations/representation/bakeoff/make_figures.py`
 
 ## Table
 

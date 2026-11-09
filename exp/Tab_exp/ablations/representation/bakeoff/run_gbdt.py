@@ -13,9 +13,9 @@ construction). Also re-runs `skrub + MLP` as a check that the rebuilt sample and
 embedding reproduce the committed row B.
 
 Writes rows to results.csv (same columns as run_bakeoff.py) and the combined
-comparison (incl. the TabFM head from ../skrub_head_ablation) to RESULTS_GBDT.md.
+comparison (incl. the TabFM head from ../skrub_head) to RESULTS_GBDT.md.
 
-    PYTHONPATH=. uv run python exp/Tab_exp/ablations/representation_bakeoff/run_gbdt.py
+    PYTHONPATH=. uv run python exp/Tab_exp/ablations/representation/bakeoff/run_gbdt.py
 """
 import sys
 from pathlib import Path
@@ -36,7 +36,7 @@ LGB_PARAMS = dict(num_leaves=31, learning_rate=0.05, min_child_samples=50,
                   subsample=0.8, subsample_freq=1, colsample_bytree=0.8)
 CB_PARAMS = dict(depth=6, learning_rate=0.05, l2_leaf_reg=3, rsm=0.8,
                  bootstrap_type="Bernoulli", subsample=0.8)
-# TabFM head on the same skrub representation (skrub_head_ablation/README.md, 3 seeds)
+# TabFM head on the same skrub representation (../skrub_head/README.md, 3 seeds)
 TABFM_ROW = {"Representation": "skrub + TabFM (head ablation)", "dim": 95,
              "auc_mean": 0.6336, "auc_std": 0.0001, "f1_mean": 0.5451, "f1_std": 0.0004,
              "acc_mean": 0.6168, "acc_std": 0.0002}
@@ -125,7 +125,7 @@ def main():
     lines = ["# Bake-off with GBDT rows\n",
              f"50k sample, split {tr.sum()}/{va.sum()}/{te.sum()}, seeds {seeds}; mean ± std over seeds. "
              "GBDTs use one fixed configuration with early stopping on validation AUC (no search, like the "
-             "fixed MLP head). The TabFM row is copied from `../skrub_head_ablation/README.md`.\n",
+             "fixed MLP head). The TabFM row is copied from `../skrub_head/README.md`.\n",
              "| Representation / head | dim | AUC | F1-macro | Accuracy |", "|---|---|---|---|---|"]
     for r in comp.itertuples(index=False):
         lines.append(f"| {r.Representation} | {r.dim} | {r.auc_mean:.4f} ± {r.auc_std:.4f} | "

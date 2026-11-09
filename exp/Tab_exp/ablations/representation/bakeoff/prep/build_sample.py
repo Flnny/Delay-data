@@ -11,7 +11,7 @@ Draw the single fixed sample used by every experiment in the bake-off.
   and raw `ARR_DELAY` (kept for the HUIM delay-cost utility downstream).
 
 Run (after build_tab_years):
-    uv run python exp/Tab_exp/representation_bakeoff/prep/build_sample.py
+    uv run python exp/Tab_exp/ablations/representation/bakeoff/prep/build_sample.py
 """
 from pathlib import Path
 

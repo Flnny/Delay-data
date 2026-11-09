@@ -10,8 +10,8 @@ sample can span all available years. Years whose Tab CSV already exists are
 skipped (pass --force to regenerate).
 
 Run:
-    uv run python exp/Tab_exp/representation_bakeoff/prep/build_tab_years.py
-    uv run python exp/Tab_exp/representation_bakeoff/prep/build_tab_years.py --years 2016 2017
+    uv run python exp/Tab_exp/ablations/representation/bakeoff/prep/build_tab_years.py
+    uv run python exp/Tab_exp/ablations/representation/bakeoff/prep/build_tab_years.py --years 2016 2017
 """
 import argparse
 import gc
@@ -25,7 +25,7 @@ import yaml
 # ── Resolve paths relative to this script (repo convention) ────────────────────
 SCRIPT_DIR = Path(__file__).resolve().parent
 EXP_DIR = SCRIPT_DIR.parent
-REPO_ROOT = EXP_DIR.parents[2]  # exp/Tab_exp/representation_bakeoff -> repo root
+REPO_ROOT = EXP_DIR.parents[4]  # exp/Tab_exp/ablations/representation/bakeoff -> repo root
 
 with open(EXP_DIR / "config.yaml", "r") as f:
     cfg = yaml.safe_load(f)

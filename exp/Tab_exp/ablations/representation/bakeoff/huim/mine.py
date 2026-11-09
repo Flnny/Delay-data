@@ -15,7 +15,7 @@ utility (there is no natural value column in flight data).
 All fitting (bins, item vocabulary, utilities) uses TRAIN rows only.
 
 Run (after build_sample):
-    uv run python exp/Tab_exp/representation_bakeoff/huim/mine.py
+    uv run python exp/Tab_exp/ablations/representation/bakeoff/huim/mine.py
 """
 import sys
 from pathlib import Path
@@ -26,7 +26,7 @@ from sklearn.preprocessing import KBinsDiscretizer
 
 EXP_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(EXP_DIR))
-import exp.Tab_exp.ablations.representation_bakeoff.common as common  # noqa: E402
+import exp.Tab_exp.ablations.representation.bakeoff.common as common  # noqa: E402
 
 BIN_LABELS = {0: "VeryLow", 1: "Low", 2: "Mid", 3: "High", 4: "VeryHigh"}
 
