@@ -262,6 +262,7 @@ def run_search(cls, init_kw, grid, X, y, X_val, y_val, t, ckpt_dir, seed):
                   **_fit_kwargs(t, t["patience_phase1"], ckpt_dir, X_val, y_val, rs=seed))
             fold.append(_fold_scores(m, X.iloc[te], y.iloc[te]))
             del m
+            gc.collect()  # Lightning/mambular keep reference cycles; RSS grew ~1 GB/h without this
             torch.cuda.empty_cache()
         row = {"params": params}
         for s in ("roc_auc", "accuracy"):
