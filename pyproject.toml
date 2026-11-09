@@ -18,6 +18,9 @@ dependencies = [
     "skrub>=0.10.0",
     "tabpfn>=8.1.0",
     "pyarrow>=25.0.0",
+    "lightgbm>=4.7.0",
+    "catboost>=1.2.10",
+    "xgboost>=3.4.1",
 ]
 
 [[tool.uv.index]]

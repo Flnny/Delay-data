@@ -143,4 +143,5 @@ def build_features(cfg: dict, arm_dir: Path, df_train, df_val, df_test, cat_cols
 
     print(f"  features ({len(features)}): {features}")
     info["features"] = features
+    info["cat_features"] = list(kcat)  # label-encoded categoricals (CatBoost cat_features)
     return df_train[features], df_val[features], df_test[features], info

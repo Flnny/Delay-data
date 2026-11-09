@@ -41,7 +41,7 @@ from sklearn.model_selection import ParameterSampler, StratifiedKFold
 
 from .seeding import set_seed
 from . import data as D
-from . import fast_loader, mambular_patch, pretab_patch
+from . import fast_loader, gbdt, mambular_patch, pretab_patch
 from .features import build_features
 from .metrics import evaluate, positive_scores
 
@@ -70,6 +70,8 @@ def _model_registry():
         "AutoInt": (AutoIntClassifier, {"d_model": 128, "n_layers": 4}),
         "ResNet": (ResNetClassifier, {}),
         "FTTransformer": (FTTransformerClassifier, {}),
+        # GBDT baselines (common/gbdt.py): same runner interface, own grids
+        **{name: (gcls, {}) for name, gcls in gbdt.MODELS.items()},
     }
 
 
@@ -185,6 +187,8 @@ def _materialize(cls, params: dict) -> dict:
     (+ `num_blocks` for ResNet). Every key returned must be a config field, so a
     grid value can never be silently ignored.
     """
+    if getattr(cls, "is_gbdt", False):
+        return dict(params)
     fields = {f.name for f in dataclasses.fields(cls().config)}
     out = dict(params)
     if "n_layers" in out and "n_layers" not in fields:
@@ -232,7 +236,7 @@ def _fit_kwargs(t: dict, patience: int, ckpt_dir: str, X_val=None, y_val=None, r
     return kw
 
 
-def phase1_signature(cfg: dict, model_name: str, extraction: str) -> str:
+def phase1_signature(cfg: dict, model_name: str, extraction: str, gbdt_grid: dict | None = None) -> str:
     t = cfg["training"]
     keys = ["phase1_frac", "phase1_val_mode", "phase1_val_size", "val_frac", "max_epochs",
             "patience_phase1", "batch_size", "precision", "n_iter", "cv", "search_scoring",
@@ -242,6 +246,8 @@ def phase1_signature(cfg: dict, model_name: str, extraction: str) -> str:
                features=cfg["features"], extraction=extraction, data=cfg["data"],
                preprocessing=cfg.get("preprocessing", {}),
                patches={k: t.get(k) for k in ("row_independent_ple", "batch_first_attention")})
+    if gbdt_grid is not None:  # only for GBDTs, so existing mambular signatures stay valid
+        sig.update(gbdt_grid=gbdt_grid, gbdt_budget=[gbdt.MAX_ROUNDS, gbdt.EARLY_STOP, gbdt.THREADS])
     return hashlib.sha256(json.dumps(sig, sort_keys=True, default=str).encode()).hexdigest()[:12]
 
 
@@ -344,9 +350,14 @@ def main(arm_dir, argv=None):
         if marker is None:
             continue
         cls, init_kw = registry[name]
-        init_kw = {**init_kw, **cfg.get("preprocessing", {})}
-        grid = _grid(t)
-        sig = phase1_signature(cfg, name, extraction)
+        if getattr(cls, "is_gbdt", False):
+            init_kw = {"cat_features": finfo["cat_features"]}
+            grid = cls.grid()
+            sig = phase1_signature(cfg, name, extraction, gbdt_grid=grid)
+        else:
+            init_kw = {**init_kw, **cfg.get("preprocessing", {})}
+            grid = _grid(t)
+            sig = phase1_signature(cfg, name, extraction)
         pkey = f"{name}|{target}|{extraction}"
         ckpt_dir = tempfile.mkdtemp(prefix=f"{name}_s{seed}_", dir=ckpt_root)
         print(f"\n{'=' * 60}\n  {name}\n{'=' * 60}")
