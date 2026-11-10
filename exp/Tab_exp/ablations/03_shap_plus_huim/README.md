@@ -34,29 +34,47 @@ uv run python $A/run.py --seed 42 $E24      # cross-year check with 2024 pattern
 
 ## Findings (3 seeds, final fit on 10% of train)
 
-Δ HUIM = 03 − 02 (same SHAP features, with vs without patterns), seed-matched:
+Patterns mined on the 2020 training days. Δ HUIM = 03 − 02 (same SHAP features, with vs
+without patterns), seed-matched:
 
-| model | 2020-train patterns: AUC | Δ HUIM | 2024 patterns: AUC | Δ HUIM |
-|---|---|---|---|---|
-| MLP | 0.608 | +0.003 | 0.589 | −0.001 |
-| AutoInt | 0.620 | −0.005 | 0.612 | **−0.014** |
-| ResNet | 0.600 | +0.004 | 0.585 | −0.002 |
-| FT-Transformer | 0.624 | −0.003 | 0.621 | −0.004 |
-| LightGBM | 0.640 | −0.000 | 0.643 | −0.000 |
-| XGBoost | 0.642 | +0.000 | 0.645 | −0.001 |
-| CatBoost | 0.636 | −0.001 | 0.642 | −0.002 |
+| model | AUC | Δ HUIM |
+|---|---|---|
+| MLP | 0.608 | +0.003 |
+| AutoInt | 0.620 | −0.005 |
+| ResNet | 0.600 | +0.004 |
+| FT-Transformer | 0.624 | −0.003 |
+| LightGBM | 0.640 | −0.000 |
+| XGBoost | 0.642 | +0.000 |
+| CatBoost | 0.636 | −0.001 |
 
 - The pattern columns add no measurable signal: every Δ HUIM is within the
   seed-to-seed spread (0.001–0.010) or negative.
-- Against all features (01b): with 2020-train patterns MLP / ResNet gain, but that gain
-  comes from the SHAP selection (02); AutoInt and FT-Transformer are 0.005–0.009 below,
-  the GBDTs 0.002–0.010 below.
-- Cross-year check: 2024 patterns are no better and hurt AutoInt (−0.014 vs 02,
-  −0.017 vs 01b).
+- Against all features (01b): MLP / ResNet gain, but that gain comes from the SHAP
+  selection (02); AutoInt and FT-Transformer are 0.005–0.009 below, the GBDTs
+  0.002–0.010 below.
 - With all of train in the final fit (GBDTs, 3 seeds), Δ HUIM stays ~0 for XGBoost and
   LightGBM; CatBoost gains +0.022 over 02, but 02 is unusually weak for CatBoost — against
   all features (01b, 0.677) 03 reaches 0.678.
 - Paired DeLong tests: `../aggregate/paired_tests.md`. Seed noise, not test sampling,
   dominates (DeLong SE ≈ 0.0002).
+
+### Patterns from another year (2024)
+
+The same arm with the SHAP ranking and HUIM patterns taken from the 2024 extraction — a
+different year than the one the models are trained and tested on (2020). It checks
+whether patterns found in another year still help.
+
+| model | AUC | Δ HUIM |
+|---|---|---|
+| MLP | 0.589 | −0.001 |
+| AutoInt | 0.612 | **−0.014** |
+| ResNet | 0.585 | −0.002 |
+| FT-Transformer | 0.621 | −0.004 |
+| LightGBM | 0.643 | −0.000 |
+| XGBoost | 0.645 | −0.001 |
+| CatBoost | 0.642 | −0.002 |
+
+The 2024 patterns add nothing either and hurt AutoInt (−0.014 vs 02, −0.017 vs all
+features).
 
 Always-current numbers (incl. `phase2_frac` 1.0): [`RESULTS.md`](RESULTS.md).

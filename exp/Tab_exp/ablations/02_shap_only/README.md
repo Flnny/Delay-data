@@ -29,22 +29,42 @@ uv run python $A/run.py --seed 42 $E24      # cross-year check with the 2024 ext
 # GBDTs: --models LightGBM,XGBoost,CatBoost ; more seeds: --seed 43 --reuse-params
 ```
 
-## Findings (3 seeds, final fit on 10% of train; Δ = 02 − 01b)
+## Findings (3 seeds, final fit on 10% of train)
 
-| model | 2020-train SHAP | Δ | 2024 SHAP | Δ |
-|---|---|---|---|---|
-| MLP | 0.605 | **+0.014** | 0.589 | −0.001 |
-| AutoInt | 0.625 | −0.004 | 0.626 | −0.003 |
-| ResNet | 0.596 | +0.002 | 0.587 | −0.006 |
-| FT-Transformer | 0.626 | −0.002 | 0.625 | −0.004 |
-| XGBoost | 0.642 | −0.003 | 0.645 | +0.001 |
-| CatBoost | 0.637 | −0.009 | 0.644 | −0.002 |
+SHAP ranking from the 2020 training days; Δ = 02 − 01b (all features), seed-matched:
+
+| model | AUC | Δ vs all features |
+|---|---|---|
+| MLP | 0.605 | **+0.014** |
+| AutoInt | 0.625 | −0.004 |
+| ResNet | 0.596 | +0.002 |
+| FT-Transformer | 0.626 | −0.002 |
+| XGBoost | 0.642 | −0.003 |
+| CatBoost | 0.637 | −0.009 |
 
 - Ten features keep almost all the signal of the full feature set.
-- With 10% of train in the final fit, the 2020-train selection helps the plain MLP
-  (+0.014) but not the stronger models.
-- With all of train in the final fit, the 2020-train selection helps the deep models
-  (seed 42: FT-Transformer 0.674 vs 0.651 on all features, ResNet 0.651 vs 0.610);
-  XGBoost is unchanged at ~0.683 (3 seeds).
+- With 10% of train in the final fit, the selection helps the plain MLP (+0.014) but not
+  the stronger models.
+- With all of train in the final fit, it helps the deep models (seed 42: FT-Transformer
+  0.674 vs 0.651 on all features, ResNet 0.651 vs 0.610); XGBoost is unchanged at
+  ~0.683 (3 seeds).
+
+### Ranking from another year (2024)
+
+The same arm with the SHAP ranking taken from the 2024 extraction instead — a different
+year than the one the models are trained and tested on (2020). It checks whether a
+ranking found in another year still selects good features for 2020.
+
+| model | AUC | Δ vs all features |
+|---|---|---|
+| MLP | 0.589 | −0.001 |
+| AutoInt | 0.626 | −0.003 |
+| ResNet | 0.587 | −0.006 |
+| FT-Transformer | 0.625 | −0.004 |
+| XGBoost | 0.645 | +0.001 |
+| CatBoost | 0.644 | −0.002 |
+
+The 2024 ranking also keeps nearly all the signal (within ~0.006 of all features) but,
+unlike the 2020 ranking, gives the MLP no gain.
 
 Always-current numbers: [`RESULTS.md`](RESULTS.md).

@@ -50,21 +50,34 @@ Each arm folder holds `config.yaml` (its feature set), `run.py`, `results.csv`,
 | SHAP top-10 + HUIM (03) | 0.624 | 0.642 |
 | HUIM only (04) | 0.588 | 0.589 |
 | LLM top-10 (06) | 0.627 | 0.636 |
-| *cross-year check, 2024 extraction:* | | |
-| SHAP top-10, 2024 (02) | 0.626 | 0.645 |
-| SHAP top-10 + HUIM, 2024 (03) | 0.621 | 0.645 |
-| HUIM only, 2024 (04) | 0.553 | 0.553 |
+
+(02–04: SHAP ranking and HUIM patterns mined on the 2020 training days.)
 
 1. GBDTs beat every deep model on every feature set.
 2. The HUIM pattern columns add no measurable signal: 03 − 02 is within the seed spread
-   or negative for all seven models (and also with the 2024 patterns).
+   or negative for all seven models.
 3. Ten SHAP features keep nearly all the signal of the full feature set.
 4. Training data volume matters more than the feature set: fitting on all of train
    instead of 10% adds 1.2–3.8 AUC points (e.g. XGBoost 0.644 → 0.683, 3 seeds).
-5. Patterns mined on another year (2024) transfer poorly: HUIM-only drops from 0.589 to
-   0.553.
-6. Seed-to-seed std (0.001–0.010) far exceeds the test-sampling error (DeLong SE
+5. Seed-to-seed std (0.001–0.010) far exceeds the test-sampling error (DeLong SE
    ≈ 0.0002); judge differences against the seed std.
+
+### Patterns from another year (2024)
+
+The method was first run with the SHAP ranking and HUIM patterns mined on **2024** data
+and applied to 2020 models. To check whether patterns found in one year still help in
+another, arms 02–04 were also run with that 2024 extraction (models still trained and
+tested on 2020):
+
+| feature set | best deep model | best GBDT |
+|---|---|---|
+| all features (01b), for comparison | 0.629 | 0.646 |
+| SHAP top-10, 2024 ranking (02) | 0.626 | 0.645 |
+| SHAP top-10 + HUIM, 2024 patterns (03) | 0.621 | 0.645 |
+| HUIM only, 2024 patterns (04) | 0.553 | 0.553 |
+
+The 2024 ranking still selects useful features, but the 2024 patterns transfer poorly:
+on their own they reach 0.553, against 0.589 for patterns mined on 2020.
 
 Full tables: [`aggregate/ABLATIONS.md`](aggregate/ABLATIONS.md).
 

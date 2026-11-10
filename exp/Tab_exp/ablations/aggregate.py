@@ -38,6 +38,19 @@ ARMS = {
     "baseline_all_features": "01 all features (legacy cfg)",
 }
 MODELS = ["MLP", "AutoInt", "ResNet", "FTTransformer", "LightGBM", "XGBoost", "CatBoost"]
+
+# Where the SHAP ranking / HUIM patterns of arms 02-04 come from. The primary
+# extraction is shown in the main tables; the other-year one gets its own section.
+PRIMARY_EXT = "02_2020_train"
+OTHER_YEAR_EXT = "01_2024_baseline"
+OTHER_YEAR_NOTE = (
+    "**What this table is.** Arms 02, 03 and 04 need a SHAP feature ranking and HUIM "
+    "patterns. In the main tables these are mined from the 2020 training days — the same "
+    "year the models are trained and tested on. The rows below repeat 02, 03 and 04 with "
+    "the ranking and patterns mined from **2024** instead (the method's original source); "
+    "the models are still trained and tested on 2020. The question is whether patterns "
+    "found in another year still help in 2020. The all-features reference (01b) is "
+    "repeated for comparison.")
 METRICS = ["auc", "accuracy", "f1_macro"]
 
 
@@ -91,8 +104,8 @@ def pivot(s: pd.DataFrame) -> pd.DataFrame:
     multi = s["target"].nunique() > 1 or s["phase2_frac"].nunique() > 1
     for (tgt, p2, arm, ext), g in s.groupby(["target", "phase2_frac", "arm", "extraction"], sort=False):
         name = ARMS.get(arm, arm)
-        if ext != "-" and not str(ext).startswith("llm_"):
-            name += f" [{ext}]"
+        if ext == OTHER_YEAR_EXT:
+            name += " — 2024 patterns"
         r = {"feature set": name}
         if multi:
             r["target/p2"] = f"{tgt}/{p2}"
@@ -157,17 +170,28 @@ def write_arm_results(s: pd.DataFrame, df: pd.DataFrame) -> list[Path]:
                  "Test set: all 2,547,088 test-day rows of 2020. Mean ± std over seeds; "
                  "AUC from predicted probabilities. `phase2_frac` = share of the training "
                  "split used for the final fit (0.1 or 1.0).\n"]
-        for (tgt, p2), h in g.groupby(["target", "phase2_frac"]):
-            lines.append(f"## target `{tgt}`, phase2_frac {p2}\n")
-            t = pd.DataFrame({
-                "extraction": h["extraction"], "model": h["model"],
+        def table(h):
+            return md_table(pd.DataFrame({
+                "model": h["model"],
                 "AUC": [fmt(x, y, n) for x, y, n in zip(h.auc_mean, h.auc_std, h.n_seeds)],
                 "accuracy": [fmt(x, y, n) for x, y, n in zip(h.accuracy_mean, h.accuracy_std, h.n_seeds)],
                 "macro-F1": [fmt(x, y, n) for x, y, n in zip(h.f1_macro_mean, h.f1_macro_std, h.n_seeds)],
-                "seeds": h["seeds"]})
-            if t["extraction"].nunique() == 1:
-                t = t.drop(columns="extraction")
-            lines += [md_table(t), ""]
+                "seeds": h["seeds"]}))
+
+        main, other = g[g.extraction != OTHER_YEAR_EXT], g[g.extraction == OTHER_YEAR_EXT]
+        if len(other):
+            lines.append("SHAP ranking / HUIM patterns mined on the **2020 training days** "
+                         "(primary). Results with patterns mined on 2024 are in the last section.\n")
+        for (tgt, p2), h in main.groupby(["target", "phase2_frac"]):
+            lines += [f"## target `{tgt}`, phase2_frac {p2}\n", table(h), ""]
+        if len(other):
+            lines += ["## Patterns mined on another year (2024)\n",
+                      "Same arm, but the SHAP ranking / HUIM patterns come from **2024** "
+                      "(the method's original source) instead of the 2020 training days. The "
+                      "models are still trained and tested on 2020; this checks whether "
+                      "patterns from another year still help.\n"]
+            for (tgt, p2), h in other.groupby(["target", "phase2_frac"]):
+                lines += [f"### target `{tgt}`, phase2_frac {p2}\n", table(h), ""]
         bp = d / "best_params.json"
         if bp.exists():
             lines.append("## Phase-1 selection (shared by all seeds and phase2_frac values)\n")
@@ -176,7 +200,8 @@ def write_arm_results(s: pd.DataFrame, df: pd.DataFrame) -> list[Path]:
                 model, tgt, ext = key.split("|")
                 best = max(e.get("search", []), key=lambda r: r.get(f"mean_{e.get('scoring', 'roc_auc')}", -1),
                            default={})
-                rows.append({"model": model, "target": tgt, "extraction": ext,
+                ext = {PRIMARY_EXT: "2020 train", OTHER_YEAR_EXT: "2024"}.get(ext, ext)
+                rows.append({"model": model, "target": tgt, "patterns from": ext,
                              "params": json.dumps(e["params"]),
                              "CV AUC": round(best.get("mean_roc_auc", float("nan")), 4)})
             lines += [md_table(pd.DataFrame(rows)), ""]
@@ -214,22 +239,37 @@ def main():
     d = deltas(df)
     d.to_csv(OUT / "deltas.csv", index=False)
 
+    is_other = s["extraction"] == OTHER_YEAR_EXT
+    is_ref = s["arm"] == "baseline_matched_training"
+    dcols = ["target", "phase2_frac", "model", "AUC 01b", "AUC 02", "AUC 03", "AUC 04",
+             "Δ SHAP sel (02−01b)", "Δ HUIM (03−02)", "Δ total (03−01b)", "Δ HUIM-only (04−01b)"]
     md = ["# Ablation results\n",
           f"Generated by `aggregate.py` from {df['source'].nunique()} arm result files, "
           f"{len(df)} runs. Test set hash(es): {sorted(df['test_hash'].unique())}. "
           "Values are mean ± std over seeds (std omitted for a single seed). "
-          "AUC is computed from predicted probabilities.\n",
+          "AUC is computed from predicted probabilities. Models are always trained and "
+          "tested on 2020; arms 02–04 use SHAP rankings / HUIM patterns mined on the 2020 "
+          "training days. Results with patterns mined on 2024 are in a separate section "
+          "at the end.\n",
           "## Side by side: AUC per feature set (rows) and model (columns)\n",
           "mean ± std over seeds; **bold** = best model for that feature set.\n",
-          md_table(pivot(s)), "",
-          "## Arm × model (all metrics)\n", md_table(disp), ""]
+          md_table(pivot(s[~is_other])), "",
+          "## Arm × model (all metrics)\n",
+          md_table(disp[~is_other.to_numpy()].drop(columns="extraction")), ""]
     if len(d):
-        show = d[["target", "phase2_frac", "extraction", "model", "AUC 01b", "AUC 02", "AUC 03", "AUC 04",
-                  "Δ SHAP sel (02−01b)", "Δ HUIM (03−02)", "Δ total (03−01b)", "Δ HUIM-only (04−01b)"]]
         md += ["## Where does the gain come from? (seed-matched AUC deltas)\n",
                "Δ SHAP sel isolates feature selection; Δ HUIM isolates adding the HUIM pattern "
                "columns on top of the same SHAP features. Empty cells: that arm has not run yet.\n",
-               md_table(show), ""]
+               md_table(d[d.extraction == PRIMARY_EXT][dcols]), ""]
+    if is_other.any():
+        md += ["## Patterns mined on another year (2024)\n", OTHER_YEAR_NOTE + "\n",
+               "### AUC per feature set and model\n",
+               md_table(pivot(s[is_other | is_ref])), "",
+               "### All metrics\n",
+               md_table(disp[(is_other | is_ref).to_numpy()].drop(columns="extraction")), ""]
+        if len(d):
+            md += ["### Seed-matched AUC deltas with 2024 patterns\n",
+                   md_table(d[d.extraction == OTHER_YEAR_EXT][dcols]), ""]
     bake = HERE / "representation" / "bakeoff" / "RESULTS_GBDT.md"
     if bake.exists():
         body = bake.read_text(encoding="utf-8").split("\n", 1)[1]

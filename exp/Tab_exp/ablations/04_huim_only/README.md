@@ -23,18 +23,29 @@ uv run python $A/run.py --seed 42 --set features.extraction_dir=../../shap_huim_
 
 ## Findings (3 seeds, final fit on 10% of train)
 
-| patterns | MLP | AutoInt | ResNet | FT | LightGBM | XGBoost | CatBoost |
-|---|---|---|---|---|---|---|---|
-| **2020-train** | 0.588 | 0.582 | 0.582 | 0.587 | 0.589 | 0.588 | 0.589 |
-| 2024 (cross-year) | 0.553 | 0.551 | 0.552 | 0.552 | 0.553 | 0.553 | 0.553 |
+Patterns mined on the 2020 training days:
 
-- The weakest arm: with 2020-train patterns 0.04–0.06 AUC below all features (01b) for
-  AutoInt, FT-Transformer and the GBDTs, and level with all features only for the plain
-  MLP (−0.002).
+| MLP | AutoInt | ResNet | FT | LightGBM | XGBoost | CatBoost |
+|---|---|---|---|---|---|---|
+| 0.588 | 0.582 | 0.582 | 0.587 | 0.589 | 0.588 | 0.589 |
+
+- The weakest arm: 0.04–0.06 AUC below all features (01b) for AutoInt, FT-Transformer
+  and the GBDTs; level with all features only for the plain MLP (−0.002).
 - All seven models land on nearly the same value, and training on all of train gains
   almost nothing (+0.001–0.003 for the GBDTs): the ceiling is set by the pattern columns,
   not by the model.
-- Cross-year check: patterns mined on 2024 carry clearly less signal (0.04–0.09 below
-  all features for every model).
+
+### Patterns from another year (2024)
+
+The same arm with the patterns taken from the 2024 extraction — a different year than the
+one the models are trained and tested on (2020). It checks whether patterns found in
+another year still carry signal in 2020.
+
+| MLP | AutoInt | ResNet | FT | LightGBM | XGBoost | CatBoost |
+|---|---|---|---|---|---|---|
+| 0.553 | 0.551 | 0.552 | 0.552 | 0.553 | 0.553 | 0.553 |
+
+The 2024 patterns carry clearly less signal: about 0.035 below the 2020 patterns, and
+0.04–0.09 below all features for every model.
 
 Always-current numbers: [`RESULTS.md`](RESULTS.md).
