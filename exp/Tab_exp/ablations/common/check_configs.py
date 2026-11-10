@@ -1,4 +1,4 @@
-"""Show how the RESOLVED configs of the ablation arms differ (TODO item 2 check).
+"""Show how the RESOLVED configs of the ablation arms differ.
 
 Each arm's config is merged exactly as the runner does (base -> arm -> overrides)
 and every leaf is compared against the reference arm. Differences under

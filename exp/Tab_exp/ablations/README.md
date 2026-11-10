@@ -1,77 +1,110 @@
-# Tabular ablations (2020)
+# Tabular ablations
 
-Feature-set ablations for binary delay prediction (`|ARR_DELAY| > 15`) on the 2020
-tabular snapshot, with mambular deep models (MLP, AutoInt, ResNet, FT-Transformer) and
-GBDT baselines (LightGBM, XGBoost, CatBoost). All arms run through one seeded runner
-(`common/`, see `common/README.md` for its design and the library bugs it fixes).
+Which features — and which models — predict US domestic flight delay
+(`|ARR_DELAY| > 15 min`, binary) from the 2020 tabular data? The ablations vary the
+**feature set** (all features, SHAP-selected, SHAP + HUIM patterns, HUIM only,
+LLM-selected) and evaluate each with four mambular deep models (MLP, AutoInt, ResNet,
+FT-Transformer) and three GBDTs (LightGBM, XGBoost, CatBoost) under one protocol:
 
-| Arm | Feature set |
-|---|---|
-| `01b_baseline_matched_training` | all raw features — **the reference** |
-| `01_baseline_all_features` | same features, legacy training settings (documented, not compared) |
-| `02_shap_only` | top-10 SHAP features |
-| `03_shap_plus_huim` | top-10 SHAP features + 20 driver / 20 protector HUIM pattern columns (proposed) |
-| `04_huim_only` | HUIM pattern columns only |
-| `06_llm_top10`, `06_1_llm_top5_datafree`, `06_2_llm_top5_datainformed` | LLM-Select rankings from `05_baseline_100_data/` |
+- temporal split by day of month — train days 1–9, validation 10–12, test 13–31 (all
+  2,547,088 test rows, identical for every arm);
+- hyper-parameter search on 10% of train (10 candidates × 3 folds, ROC-AUC), then a
+  final fit on 10% of train (`phase2_frac` 0.1) and, separately, on all of it (1.0);
+- seeds 42 / 43 / 44, reported as mean ± std; AUC from predicted probabilities.
 
-02/03/04 take their SHAP/HUIM files from `features.extraction_dir`:
-`../../shap_huim_extractions/01_2024_baseline/csvs` (2024, default) or
-`../../shap_huim_extractions/02_2020_train/csvs` (2020 train days only).
+The shared, seeded runner and the library issues it handles are described in
+[`common/README.md`](common/README.md).
 
-Results: `aggregate/ABLATIONS.md` (mean ± std over seeds 42/43/44, Δ tables) and
-`aggregate/paired_tests.md` (paired DeLong tests). Representation bake-off (50k sample,
-all years): `representation/bakeoff/RESULTS_GBDT.md`.
+## Arms
+
+| folder | feature set | README |
+|---|---|---|
+| `01b_baseline_matched_training` | all raw features — **reference** | [→](01b_baseline_matched_training/README.md) |
+| `01_baseline_all_features` | same features, original (non-comparable) training settings | [→](01_baseline_all_features/README.md) |
+| `02_shap_only` | top-10 SHAP features | [→](02_shap_only/README.md) |
+| `03_shap_plus_huim` | top-10 SHAP features + 40 HUIM pattern columns (proposed method) | [→](03_shap_plus_huim/README.md) |
+| `04_huim_only` | HUIM pattern columns only | [→](04_huim_only/README.md) |
+| `05_baseline_100_data` | LLM feature ranking (no training) feeding the 06 arms | [→](05_baseline_100_data/README.md) |
+| `06_llm_top10` | top-10 LLM-selected features | [→](06_llm_top10/README.md) |
+| `06_1_llm_top5_datafree` | top-5 LLM features, prompt without data | [→](06_1_llm_top5_datafree/README.md) |
+| `06_2_llm_top5_datainformed` | top-5 LLM features, prompt with 100 sample rows | [→](06_2_llm_top5_datainformed/README.md) |
+| `representation/` | representation × head on a 50k all-years sample (bake-off, TabFM head) | [→](representation/README.md) |
+| `aggregate/` | generated tables over all arms, paired tests | [→](aggregate/README.md) |
+
+02 / 03 / 04 read their SHAP ranking and HUIM patterns from `features.extraction_dir`:
+`01_2024_baseline` (mined on 2024, default) or `02_2020_train` (mined on 2020 training
+days only) under `../shap_huim_extractions/`.
+
+Each arm folder holds `config.yaml` (its feature set), `run.py`, `results.csv`,
+`best_params.json` (Phase-1 selection), a generated `RESULTS.md`, and — gitignored —
+`predictions/` with the test probabilities.
+
+## Main findings (seeds 42/43/44, final fit on 10% of train)
+
+| feature set | best deep model | best GBDT |
+|---|---|---|
+| all features (01b) | 0.629 (AutoInt, FT) | **0.646** (CatBoost) |
+| SHAP top-10, 2024 (02) | 0.626 | 0.645 |
+| SHAP top-10 + HUIM, 2024 (03) | 0.621 | 0.645 |
+| SHAP top-10 + HUIM, 2020-train (03) | 0.624 | 0.642 |
+| LLM top-10 (06) | 0.627 | 0.636 |
+| HUIM only, 2020-train (04) | 0.588 | 0.589 |
+
+1. GBDTs beat every deep model on every feature set.
+2. The HUIM pattern columns add no measurable signal: 03 − 02 is within the seed spread
+   or negative for all seven models and both extractions.
+3. Ten SHAP features keep nearly all the signal of the full feature set.
+4. Training data volume matters more than the feature set: fitting on all of train
+   instead of 10% adds 1.2–3.8 AUC points (seed 42; e.g. XGBoost 0.644 → 0.683).
+5. Seed-to-seed std (0.001–0.010) far exceeds the test-sampling error (DeLong SE
+   ≈ 0.0002); judge differences against the seed std.
+
+Full tables: [`aggregate/ABLATIONS.md`](aggregate/ABLATIONS.md).
 
 ## How to reproduce
 
-Run from the repo root. Data: download the Kaggle dataset into
-`Datasets/Aeolus/Flight_Tab/Tab/` (see the top-level README); `uv sync` installs everything.
+Run from the repository root after downloading the dataset into
+`Datasets/Aeolus/Flight_Tab/Tab/` and `uv sync`.
 
 ```bash
-# 0. (optional) self-checks of the runner's library patches — all should print OK/IDENTICAL
-uv run python exp/Tab_exp/ablations/common/verify_fast_loader.py --accelerator gpu
-(cd exp/Tab_exp/ablations && uv run python -m common.pretab_patch && uv run python -m common.mambular_patch)
-
-# 1. SHAP + HUIM extractions (02/03/04 read these). 01_2024_baseline is committed as-is.
-uv run python exp/Tab_exp/shap_huim_extractions/02_2020_train/run.py            # ~30 min
-
-# 2. LLM-Select rankings for the 06 arms (committed; needs a local Ollama qwen2.5:7b)
-uv run python exp/Tab_exp/ablations/05_baseline_100_data/run.py
-uv run python exp/Tab_exp/ablations/05_baseline_100_data/compare.py             # SHAP vs LLM, both extractions
-
-# 3. Seed 42 — full protocol (Phase 1 search + Phase 2) for every arm.
 A=exp/Tab_exp/ablations
 E20="--set features.extraction_dir=../../shap_huim_extractions/02_2020_train/csvs"
+
+# 0. optional self-checks of the runner's library patches (print OK / IDENTICAL)
+uv run python $A/common/verify_fast_loader.py --accelerator gpu
+(cd $A && uv run python -m common.pretab_patch && uv run python -m common.mambular_patch)
+
+# 1. inputs (both committed): 2020-train SHAP/HUIM extraction, LLM rankings
+uv run python exp/Tab_exp/shap_huim_extractions/02_2020_train/run.py      # ~30 min
+uv run python $A/05_baseline_100_data/run.py                              # needs Ollama qwen2.5:7b
+
+# 2. seed 42: search + final fit for every arm (deep models; add
+#    --models LightGBM,XGBoost,CatBoost for the GBDTs)
 uv run python $A/01b_baseline_matched_training/run.py --seed 42
 for arm in 02_shap_only 03_shap_plus_huim 04_huim_only; do
-  uv run python $A/$arm/run.py --seed 42            # 2024 extraction
-  uv run python $A/$arm/run.py --seed 42 $E20       # 2020-train extraction
+  uv run python $A/$arm/run.py --seed 42          # 2024 extraction
+  uv run python $A/$arm/run.py --seed 42 $E20     # 2020-train extraction
 done
 for arm in 06_llm_top10 06_1_llm_top5_datafree 06_2_llm_top5_datainformed; do
   uv run python $A/$arm/run.py --seed 42
 done
-#    GBDT baselines: same commands with  --models LightGBM,XGBoost,CatBoost
 
-# 4. Seeds 43 and 44 — reuse the stored Phase-1 params, repeat Phase 2 only.
-#    Same commands as step 3 with  --seed 43 --reuse-params  (and 44).
+# 3. seeds 43, 44 and the all-of-train final fit reuse the stored search:
+#    same commands with  --seed 43 --reuse-params
+#    and with           --reuse-params --set training.phase2_frac=1.0
 
-# 5. Tables
-uv run python $A/aggregate.py          # -> aggregate/ABLATIONS.md, ablation_table.csv, deltas.csv
-uv run python $A/paired_test.py        # -> aggregate/paired_tests.md
-uv run python $A/common/check_configs.py   # arms differ only in their feature set?
-
-# 6. Bake-off GBDT rows (rebuilds the 50k sample if artifacts/ is missing)
-uv run python $A/representation/bakeoff/prep/build_sample.py
-uv run python $A/representation/bakeoff/run_gbdt.py
+# 4. tables
+uv run python $A/aggregate.py          # aggregate/*, <arm>/RESULTS.md
+uv run python $A/paired_test.py        # aggregate/paired_tests.*
+uv run python $A/common/check_configs.py
 ```
 
 Notes:
-- Every run is deterministic (seeded; same AUC to the last digit on re-run). A finished
-  `(model, seed, target, phase2_frac, extraction)` is skipped, so commands can be re-issued.
-- Runs can go in parallel (results/params writes are locked; in-progress work is claimed
-  with `.running__*` markers). On a 32 GB machine keep **≤ 3** concurrent arms: a
-  mambular FT-Transformer search peaks at 6–8 GB RAM.
-- Budget on an RTX 5060 Ti: one arm at seed 42 with the 4 mambular models ≈ 3–6 h
-  (FT-Transformer/AutoInt searches dominate); a seed-43/44 rerun ≈ 20–25 min; the three
-  GBDTs for one arm ≈ 5–15 min.
-- `--target late|3class` gives the other targets; results are keyed by target.
+- Every run is deterministic; a finished `(model, seed, target, phase2_frac, extraction)`
+  is skipped, so commands can be re-issued.
+- Runs can go in parallel (locked writes, `.running__*` claims). On a 32 GB machine keep
+  at most three or four concurrent runs; after a restart delete leftover `.running__*`.
+- Runtime on one RTX 5060 Ti: search + final fit of the four deep models for one arm
+  3–6 h; an extra seed 20–25 min; the three GBDTs 5–15 min per arm; an all-of-train final
+  fit of the deep models 10–60 min per arm.
+- `--target late|3class` selects other targets; results are kept per target.

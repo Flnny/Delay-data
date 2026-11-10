@@ -3,12 +3,12 @@ experiment:
   description: >
     All raw features, no SHAP selection, no HUIM.
     NOTE: trained under its legacy (non-comparable) settings via `overrides` below;
-    the comparable reference arm is 01b (added in TODO item 2).
+    the comparable reference arm is 01b_baseline_matched_training.
 
 features:
   mode: "all"
 
-# Legacy 01 training settings (differ from 02-06 — see ablation_fixes_TODO.md item 2)
+# Legacy 01 training settings (differ from every other arm; kept only to document them)
 overrides:
   training:
     phase1_val_mode: "internal"

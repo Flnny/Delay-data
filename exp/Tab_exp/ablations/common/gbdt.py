@@ -6,7 +6,7 @@ Each adapter class looks like a mambular classifier to common/runner.py:
 so Phase 1 (n_iter candidates x cv folds on the phase-1 sample, ROC-AUC selection),
 Phase 2, chunked inference, saved predictions and paired tests are shared verbatim.
 
-Fairness rules (TODO item 5):
+Fairness rules (so GBDTs and deep models are compared on equal terms):
 - same split, same feature matrices as the mambular arms (built by features.py);
 - CatBoost receives the label-encoded categorical columns as native `cat_features`;
   LightGBM / XGBoost get the very same integer codes as numeric columns;

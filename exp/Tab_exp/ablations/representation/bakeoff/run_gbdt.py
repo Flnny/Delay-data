@@ -1,5 +1,5 @@
 """
-run_gbdt.py — GBDT rows for the representation bake-off (TODO item 5)
+run_gbdt.py — GBDT rows for the representation bake-off
 =====================================================================
 Same 50k sample, same temporal split, same seeds (head.seeds) as the MLP-head rows:
 
