@@ -4,11 +4,12 @@ Two extractions live in `exp/Tab_exp/shap_huim_extractions/`, each writing `csvs
 (`shap_feature_importance.csv`, `huim_delay_drivers.csv`, `huim_delay_protectors.csv`,
 `huim_item_labels.csv`) and `txt/` (PAMI transaction files):
 
-- `01_2024_baseline/` — mined on **2024** (different year from the 2020 ablations). Kept
-  unchanged because legacy 03/04 results used exactly these files.
-- `02_2020_train/` — mined on **2020 train days only** (MLP fit on FL_DAY 1–7, early
-  stopping + explained rows from FL_DAY 8–9; val/test days dropped after reading).
-  Leakage-safe source for the 2020 ablations.
+- `02_2020_train/` — **primary**. Mined on **2020 train days only** (MLP fit on FL_DAY
+  1–7, early stopping + explained rows from FL_DAY 8–9; val/test days dropped after
+  reading): same year as the ablations, no leakage.
+- `01_2024_baseline/` — mined on **2024**, the method's original source. Kept unchanged
+  (legacy 03/04 results used exactly these files) and used only as a cross-year
+  transfer check; its patterns transfer poorly to 2020.
 
 Pipeline (both): sample 10% → MLP → SHAP (`bg_samples=200`, `test_samples=1000`) →
 5 quantile bins for continuous features → two HUIM streams (**positive SHAP = delay
@@ -16,8 +17,8 @@ drivers**, **negative SHAP = delay protectors**, utility = `int(|SHAP| × 10000)
 PAMI EFIM with `minUtil` = p90 of transaction utilities.
 
 Hand-off: ablations 02/03/04 read the CSVs from `features.extraction_dir` (relative to
-the arm dir, default `../../shap_huim_extractions/01_2024_baseline/csvs`). Switch
-extraction with `--set features.extraction_dir=../../shap_huim_extractions/02_2020_train/csvs`.
+the arm dir, default `../../shap_huim_extractions/02_2020_train/csvs`). Cross-year check
+with `--set features.extraction_dir=../../shap_huim_extractions/01_2024_baseline/csvs`.
 There is no `exp/Tab_exp/SHAP_HUIM/` copy step anymore.
 
 Known quirks:

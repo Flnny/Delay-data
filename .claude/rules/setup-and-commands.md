@@ -16,7 +16,7 @@ uv run python exp/Tab_exp/ablations/01b_baseline_matched_training/run.py --seed 
 uv run python exp/Tab_exp/ablations/02_shap_only/run.py --seed 42                   # top-10 SHAP features
 uv run python exp/Tab_exp/ablations/03_shap_plus_huim/run.py --seed 42              # SHAP + HUIM (proposed)
 uv run python exp/Tab_exp/ablations/04_huim_only/run.py --seed 42                   # HUIM patterns only
-#   other extraction: --set features.extraction_dir=../../shap_huim_extractions/02_2020_train/csvs
+#   default extraction = 02_2020_train; cross-year check: --set features.extraction_dir=../../shap_huim_extractions/01_2024_baseline/csvs
 uv run python exp/Tab_exp/ablations/aggregate.py      # -> ablations/aggregate/ABLATIONS.md
 uv run python exp/Tab_exp/ablations/paired_test.py    # paired DeLong tests on saved predictions
 uv run python exp/Tab_exp/ablations/common/check_configs.py   # arms differ only in features?

@@ -31,9 +31,11 @@ The shared, seeded runner and the library issues it handles are described in
 | `representation/` | representation × head on a 50k all-years sample (bake-off, TabFM head) | [→](representation/README.md) |
 | `aggregate/` | generated tables over all arms, paired tests | [→](aggregate/README.md) |
 
-02 / 03 / 04 read their SHAP ranking and HUIM patterns from `features.extraction_dir`:
-`01_2024_baseline` (mined on 2024, default) or `02_2020_train` (mined on 2020 training
-days only) under `../shap_huim_extractions/`.
+All models are trained and tested on 2020. 02 / 03 / 04 read their SHAP ranking and
+HUIM patterns from `features.extraction_dir` under `../shap_huim_extractions/`:
+**`02_2020_train`** (default, primary — mined on 2020 training days only, so no
+validation or test day influences the selection) or `01_2024_baseline` (mined on 2024,
+the method's original source; kept as a cross-year transfer check).
 
 Each arm folder holds `config.yaml` (its feature set), `run.py`, `results.csv`,
 `best_params.json` (Phase-1 selection), a generated `RESULTS.md`, and — gitignored —
@@ -44,19 +46,24 @@ Each arm folder holds `config.yaml` (its feature set), `run.py`, `results.csv`,
 | feature set | best deep model | best GBDT |
 |---|---|---|
 | all features (01b) | 0.629 (AutoInt, FT) | **0.646** (CatBoost) |
+| SHAP top-10 (02) | 0.626 | 0.642 |
+| SHAP top-10 + HUIM (03) | 0.624 | 0.642 |
+| HUIM only (04) | 0.588 | 0.589 |
+| LLM top-10 (06) | 0.627 | 0.636 |
+| *cross-year check, 2024 extraction:* | | |
 | SHAP top-10, 2024 (02) | 0.626 | 0.645 |
 | SHAP top-10 + HUIM, 2024 (03) | 0.621 | 0.645 |
-| SHAP top-10 + HUIM, 2020-train (03) | 0.624 | 0.642 |
-| LLM top-10 (06) | 0.627 | 0.636 |
-| HUIM only, 2020-train (04) | 0.588 | 0.589 |
+| HUIM only, 2024 (04) | 0.553 | 0.553 |
 
 1. GBDTs beat every deep model on every feature set.
 2. The HUIM pattern columns add no measurable signal: 03 − 02 is within the seed spread
-   or negative for all seven models and both extractions.
+   or negative for all seven models (and also with the 2024 patterns).
 3. Ten SHAP features keep nearly all the signal of the full feature set.
 4. Training data volume matters more than the feature set: fitting on all of train
-   instead of 10% adds 1.2–3.8 AUC points (seed 42; e.g. XGBoost 0.644 → 0.683).
-5. Seed-to-seed std (0.001–0.010) far exceeds the test-sampling error (DeLong SE
+   instead of 10% adds 1.2–3.8 AUC points (e.g. XGBoost 0.644 → 0.683, 3 seeds).
+5. Patterns mined on another year (2024) transfer poorly: HUIM-only drops from 0.589 to
+   0.553.
+6. Seed-to-seed std (0.001–0.010) far exceeds the test-sampling error (DeLong SE
    ≈ 0.0002); judge differences against the seed std.
 
 Full tables: [`aggregate/ABLATIONS.md`](aggregate/ABLATIONS.md).
@@ -68,7 +75,7 @@ Run from the repository root after downloading the dataset into
 
 ```bash
 A=exp/Tab_exp/ablations
-E20="--set features.extraction_dir=../../shap_huim_extractions/02_2020_train/csvs"
+E24="--set features.extraction_dir=../../shap_huim_extractions/01_2024_baseline/csvs"
 
 # 0. optional self-checks of the runner's library patches (print OK / IDENTICAL)
 uv run python $A/common/verify_fast_loader.py --accelerator gpu
@@ -82,8 +89,8 @@ uv run python $A/05_baseline_100_data/run.py                              # need
 #    --models LightGBM,XGBoost,CatBoost for the GBDTs)
 uv run python $A/01b_baseline_matched_training/run.py --seed 42
 for arm in 02_shap_only 03_shap_plus_huim 04_huim_only; do
-  uv run python $A/$arm/run.py --seed 42          # 2024 extraction
-  uv run python $A/$arm/run.py --seed 42 $E20     # 2020-train extraction
+  uv run python $A/$arm/run.py --seed 42          # 2020-train extraction (default)
+  uv run python $A/$arm/run.py --seed 42 $E24     # cross-year check (2024 extraction)
 done
 for arm in 06_llm_top10 06_1_llm_top5_datafree 06_2_llm_top5_datainformed; do
   uv run python $A/$arm/run.py --seed 42

@@ -7,5 +7,6 @@ experiment:
 features:
   mode: "shap_only"
   top_shap_n: 10
-  # Directory holding shap_feature_importance.csv (+ HUIM CSVs). Relative to this arm dir.
-  extraction_dir: "../../shap_huim_extractions/01_2024_baseline/csvs"
+  # SHAP/HUIM files, relative to this arm dir. Primary: 2020 training days only.
+  # Cross-year check: --set features.extraction_dir=../../shap_huim_extractions/01_2024_baseline/csvs
+  extraction_dir: "../../shap_huim_extractions/02_2020_train/csvs"

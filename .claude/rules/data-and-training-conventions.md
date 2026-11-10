@@ -1,6 +1,6 @@
 # Data & training conventions (must preserve)
 
-- **Two dataset years — don't conflate them.** The **ablations** train/evaluate on **2020** (`Flight_tab_2020.csv`, `data_info_2020.yaml`). SHAP/HUIM patterns come from either **2024** (`01_2024_baseline`) or **2020 train days** (`02_2020_train`) — see `shap-huim-method.md`.
+- **Two dataset years — don't conflate them.** The **ablations** train/evaluate on **2020** (`Flight_tab_2020.csv`, `data_info_2020.yaml`). SHAP/HUIM patterns come from **2020 train days** (`02_2020_train`, primary/default) or, as a cross-year check, **2024** (`01_2024_baseline`) — see `shap-huim-method.md`.
 - **Temporal split by day-of-month — never shuffle across days** (prevents leakage): train `FL_DAY ≤ 9`, val `10 ≤ FL_DAY ≤ 12`, test `FL_DAY > 12`. The test split is never subsampled; every arm must report the same `test_hash` (`ablations/test_hashes.json`, enforced by the runner).
 - **Excluded columns:** `FLIGHTS`, `FL_YEAR`, `FL_MONTH`, and `FL_DAY` (split key only — test days never occur in train).
 - **Encoding (train-fit only):** categorical label maps learned on train (unseen → `-1`), `StandardScaler` on train, HUIM bins (`KBinsDiscretizer`, exact quantiles) on train. Label-encoded columns are forced categorical for mambular (`preprocessing.cat_cutoff`).
