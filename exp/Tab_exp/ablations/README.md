@@ -53,12 +53,31 @@ Each arm folder holds `config.yaml` (its feature set), `run.py`, `results.csv`,
 
 (02–04: SHAP ranking and HUIM patterns mined on the 2020 training days.)
 
+**Final fit on all of train** (`phase2_frac` 1.0, seeds 42/43/44; search unchanged):
+
+| feature set | best deep model | best GBDT |
+|---|---|---|
+| all features (01b) | 0.663 (AutoInt) | **0.683** (XGBoost) |
+| SHAP top-10 (02) | 0.674 (FT-Transformer) | **0.683** (XGBoost) |
+| SHAP top-10 + HUIM (03) | 0.670 (AutoInt) | **0.683** (XGBoost) |
+| HUIM only (04) | 0.590 | 0.591 |
+| LLM top-10 (06) | 0.661 | 0.675 |
+
+With all of train the SHAP top-10 lifts every deep model above its all-features score
+(FT-Transformer +0.023, ResNet +0.029, MLP +0.024, AutoInt +0.004), while XGBoost stays at
+0.683 on every feature set. HUIM still adds nothing measurable (03 − 02 between −0.011
+and +0.009 for the deep models, ~0 for LightGBM / XGBoost; CatBoost +0.022 only because
+its 02 score is unusually low). One cell is incomplete: FT-Transformer on 03 did not
+train on seed 43 (AUC 0.500, validation loss flat from the first epoch) and stalled on
+seed 44 (no epoch finished in hours, run twice), so that cell holds 2 seeds.
+
 1. GBDTs beat every deep model on every feature set.
 2. The HUIM pattern columns add no measurable signal: 03 − 02 is within the seed spread
    or negative for all seven models.
 3. Ten SHAP features keep nearly all the signal of the full feature set.
 4. Training data volume matters more than the feature set: fitting on all of train
-   instead of 10% adds 1.2–3.8 AUC points (e.g. XGBoost 0.644 → 0.683, 3 seeds).
+   instead of 10% adds 2–5 AUC points to the strong models (e.g. XGBoost 0.644 → 0.683,
+   AutoInt 0.629 → 0.663, 3 seeds).
 5. Seed-to-seed std (0.001–0.010) far exceeds the test-sampling error (DeLong SE
    ≈ 0.0002); judge differences against the seed std.
 

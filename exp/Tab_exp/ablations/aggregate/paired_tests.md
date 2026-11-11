@@ -5,86 +5,86 @@ test_hash 7cab2c005e188b58, n_test 2547088. `p_max` = largest per-seed p-value; 
 | A | B | extraction | model | p2 | seeds | ΔAUC mean | ΔAUC std (seeds) | DeLong SE | p_max |
 |---|---|---|---|---|---|---|---|---|---|
 | 02_shap_only | 01b_baseline_matched_training | 01_2024_baseline | AutoInt | 0.1 | 3 | -0.0030 | 0.0061 | 0.0002 | 4.3e-17 |
-| 02_shap_only | 01b_baseline_matched_training | 01_2024_baseline | AutoInt | 1.0 | 1 | +0.0077 |  | 0.0002 | 4.5e-221 |
+| 02_shap_only | 01b_baseline_matched_training | 01_2024_baseline | AutoInt | 1.0 | 3 | +0.0044 | 0.0029 | 0.0002 | 6.3e-22 |
 | 02_shap_only | 01b_baseline_matched_training | 01_2024_baseline | CatBoost | 0.1 | 3 | -0.0022 | 0.0007 | 0.0001 | 7e-40 |
 | 02_shap_only | 01b_baseline_matched_training | 01_2024_baseline | CatBoost | 1.0 | 3 | -0.0024 | 0.0014 | 0.0001 | 6.3e-17 |
 | 02_shap_only | 01b_baseline_matched_training | 01_2024_baseline | FTTransformer | 0.1 | 3 | -0.0038 | 0.0013 | 0.0002 | 8.5e-22 |
-| 02_shap_only | 01b_baseline_matched_training | 01_2024_baseline | FTTransformer | 1.0 | 1 | +0.0092 |  | 0.0002 | 0 |
+| 02_shap_only | 01b_baseline_matched_training | 01_2024_baseline | FTTransformer | 1.0 | 3 | +0.0093 | 0.0022 | 0.0002 | 2.2e-206 |
 | 02_shap_only | 01b_baseline_matched_training | 01_2024_baseline | LightGBM | 0.1 | 3 | +0.0012 | 0.0002 | 0.0001 | 2.9e-11 |
 | 02_shap_only | 01b_baseline_matched_training | 01_2024_baseline | LightGBM | 1.0 | 3 | +0.0019 | 0.0003 | 0.0001 | 1.9e-29 |
 | 02_shap_only | 01b_baseline_matched_training | 01_2024_baseline | MLP | 0.1 | 3 | -0.0012 | 0.0018 | 0.0001 | 2.1e-05 |
-| 02_shap_only | 01b_baseline_matched_training | 01_2024_baseline | MLP | 1.0 | 1 | -0.0029 |  | 0.0002 | 2.6e-80 |
+| 02_shap_only | 01b_baseline_matched_training | 01_2024_baseline | MLP | 1.0 | 3 | -0.0046 | 0.0059 | 0.0001 | 0.0047 |
 | 02_shap_only | 01b_baseline_matched_training | 01_2024_baseline | ResNet | 0.1 | 3 | -0.0062 | 0.0032 | 0.0001 | 4.4e-187 |
-| 02_shap_only | 01b_baseline_matched_training | 01_2024_baseline | ResNet | 1.0 | 1 | -0.0171 |  | 0.0002 | 0 |
+| 02_shap_only | 01b_baseline_matched_training | 01_2024_baseline | ResNet | 1.0 | 3 | -0.0134 | 0.0135 | 0.0002 | 2.9e-17 |
 | 02_shap_only | 01b_baseline_matched_training | 01_2024_baseline | XGBoost | 0.1 | 3 | +0.0010 | 0.0006 | 0.0002 | 0.0016 |
 | 02_shap_only | 01b_baseline_matched_training | 01_2024_baseline | XGBoost | 1.0 | 3 | +0.0011 | 0.0003 | 0.0002 | 1.7e-08 |
 | 02_shap_only | 01b_baseline_matched_training | 02_2020_train | AutoInt | 0.1 | 3 | -0.0037 | 0.0029 | 0.0002 | 0.01 |
-| 02_shap_only | 01b_baseline_matched_training | 02_2020_train | AutoInt | 1.0 | 1 | +0.0097 |  | 0.0002 | 0 |
+| 02_shap_only | 01b_baseline_matched_training | 02_2020_train | AutoInt | 1.0 | 3 | +0.0034 | 0.0076 | 0.0002 | 2.9e-104 |
 | 02_shap_only | 01b_baseline_matched_training | 02_2020_train | CatBoost | 0.1 | 3 | -0.0088 | 0.0004 | 0.0002 | 0 |
 | 02_shap_only | 01b_baseline_matched_training | 02_2020_train | CatBoost | 1.0 | 3 | -0.0210 | 0.0014 | 0.0002 | 0 |
 | 02_shap_only | 01b_baseline_matched_training | 02_2020_train | FTTransformer | 0.1 | 3 | -0.0022 | 0.0023 | 0.0002 | 0.11 |
-| 02_shap_only | 01b_baseline_matched_training | 02_2020_train | FTTransformer | 1.0 | 1 | +0.0231 |  | 0.0002 | 0 |
+| 02_shap_only | 01b_baseline_matched_training | 02_2020_train | FTTransformer | 1.0 | 3 | +0.0232 | 0.0072 | 0.0003 | 0 |
 | 02_shap_only | 01b_baseline_matched_training | 02_2020_train | LightGBM | 0.1 | 3 | -0.0018 | 0.0004 | 0.0002 | 1.4e-16 |
 | 02_shap_only | 01b_baseline_matched_training | 02_2020_train | LightGBM | 1.0 | 3 | +0.0009 | 0.0003 | 0.0001 | 0.00012 |
 | 02_shap_only | 01b_baseline_matched_training | 02_2020_train | MLP | 0.1 | 3 | +0.0144 | 0.0067 | 0.0002 | 0 |
-| 02_shap_only | 01b_baseline_matched_training | 02_2020_train | MLP | 1.0 | 1 | +0.0259 |  | 0.0002 | 0 |
+| 02_shap_only | 01b_baseline_matched_training | 02_2020_train | MLP | 1.0 | 3 | +0.0240 | 0.0017 | 0.0002 | 0 |
 | 02_shap_only | 01b_baseline_matched_training | 02_2020_train | ResNet | 0.1 | 3 | +0.0024 | 0.0020 | 0.0001 | 0.0012 |
-| 02_shap_only | 01b_baseline_matched_training | 02_2020_train | ResNet | 1.0 | 1 | +0.0405 |  | 0.0003 | 0 |
+| 02_shap_only | 01b_baseline_matched_training | 02_2020_train | ResNet | 1.0 | 3 | +0.0292 | 0.0104 | 0.0003 | 0 |
 | 02_shap_only | 01b_baseline_matched_training | 02_2020_train | XGBoost | 0.1 | 3 | -0.0025 | 0.0001 | 0.0002 | 1.3e-39 |
 | 02_shap_only | 01b_baseline_matched_training | 02_2020_train | XGBoost | 1.0 | 3 | -0.0001 | 0.0005 | 0.0002 | 0.47 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 01_2024_baseline | AutoInt | 0.1 | 3 | -0.0166 | 0.0022 | 0.0002 | 0 |
-| 03_shap_plus_huim | 01b_baseline_matched_training | 01_2024_baseline | AutoInt | 1.0 | 1 | +0.0005 |  | 0.0002 | 0.019 |
+| 03_shap_plus_huim | 01b_baseline_matched_training | 01_2024_baseline | AutoInt | 1.0 | 3 | +0.0005 | 0.0004 | 0.0002 | 0.75 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 01_2024_baseline | CatBoost | 0.1 | 3 | -0.0037 | 0.0009 | 0.0001 | 3.2e-93 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 01_2024_baseline | CatBoost | 1.0 | 3 | +0.0024 | 0.0016 | 0.0001 | 4.9e-30 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 01_2024_baseline | FTTransformer | 0.1 | 3 | -0.0076 | 0.0034 | 0.0002 | 2.1e-100 |
-| 03_shap_plus_huim | 01b_baseline_matched_training | 01_2024_baseline | FTTransformer | 1.0 | 1 | +0.0061 |  | 0.0002 | 5.7e-167 |
+| 03_shap_plus_huim | 01b_baseline_matched_training | 01_2024_baseline | FTTransformer | 1.0 | 3 | +0.0050 | 0.0073 | 0.0002 | 5.8e-30 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 01_2024_baseline | LightGBM | 0.1 | 3 | +0.0010 | 0.0005 | 0.0001 | 0.00056 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 01_2024_baseline | LightGBM | 1.0 | 3 | +0.0012 | 0.0003 | 0.0001 | 1.4e-13 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 01_2024_baseline | MLP | 0.1 | 3 | -0.0019 | 0.0009 | 0.0001 | 8.8e-22 |
-| 03_shap_plus_huim | 01b_baseline_matched_training | 01_2024_baseline | MLP | 1.0 | 1 | -0.0036 |  | 0.0002 | 1.6e-77 |
+| 03_shap_plus_huim | 01b_baseline_matched_training | 01_2024_baseline | MLP | 1.0 | 3 | -0.0033 | 0.0028 | 0.0002 | 0.054 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 01_2024_baseline | ResNet | 0.1 | 3 | -0.0079 | 0.0029 | 0.0002 | 0 |
-| 03_shap_plus_huim | 01b_baseline_matched_training | 01_2024_baseline | ResNet | 1.0 | 1 | -0.0146 |  | 0.0002 | 0 |
+| 03_shap_plus_huim | 01b_baseline_matched_training | 01_2024_baseline | ResNet | 1.0 | 3 | -0.0213 | 0.0065 | 0.0002 | 0 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 01_2024_baseline | XGBoost | 0.1 | 3 | +0.0005 | 0.0008 | 0.0002 | 0.11 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 01_2024_baseline | XGBoost | 1.0 | 3 | +0.0004 | 0.0004 | 0.0002 | 0.73 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 02_2020_train | AutoInt | 0.1 | 3 | -0.0088 | 0.0036 | 0.0002 | 2.1e-159 |
-| 03_shap_plus_huim | 01b_baseline_matched_training | 02_2020_train | AutoInt | 1.0 | 1 | +0.0100 |  | 0.0002 | 0 |
+| 03_shap_plus_huim | 01b_baseline_matched_training | 02_2020_train | AutoInt | 1.0 | 3 | +0.0070 | 0.0027 | 0.0002 | 3e-95 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 02_2020_train | CatBoost | 0.1 | 3 | -0.0095 | 0.0005 | 0.0002 | 0 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 02_2020_train | CatBoost | 1.0 | 3 | +0.0009 | 0.0017 | 0.0002 | 0.82 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 02_2020_train | FTTransformer | 0.1 | 3 | -0.0050 | 0.0010 | 0.0002 | 1.4e-57 |
-| 03_shap_plus_huim | 01b_baseline_matched_training | 02_2020_train | FTTransformer | 1.0 | 1 | +0.0156 |  | 0.0003 | 0 |
+| 03_shap_plus_huim | 01b_baseline_matched_training | 02_2020_train | FTTransformer | 1.0 | 2 | -0.0642 | 0.1129 | 0.0003 | 0 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 02_2020_train | LightGBM | 0.1 | 3 | -0.0019 | 0.0008 | 0.0002 | 8.7e-20 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 02_2020_train | LightGBM | 1.0 | 3 | +0.0013 | 0.0002 | 0.0002 | 1.2e-14 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 02_2020_train | MLP | 0.1 | 3 | +0.0170 | 0.0082 | 0.0002 | 0 |
-| 03_shap_plus_huim | 01b_baseline_matched_training | 02_2020_train | MLP | 1.0 | 1 | +0.0333 |  | 0.0003 | 0 |
+| 03_shap_plus_huim | 01b_baseline_matched_training | 02_2020_train | MLP | 1.0 | 3 | +0.0327 | 0.0031 | 0.0003 | 0 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 02_2020_train | ResNet | 0.1 | 3 | +0.0064 | 0.0069 | 0.0002 | 7.3e-07 |
-| 03_shap_plus_huim | 01b_baseline_matched_training | 02_2020_train | ResNet | 1.0 | 1 | +0.0278 |  | 0.0003 | 0 |
+| 03_shap_plus_huim | 01b_baseline_matched_training | 02_2020_train | ResNet | 1.0 | 3 | +0.0183 | 0.0096 | 0.0002 | 0 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 02_2020_train | XGBoost | 0.1 | 3 | -0.0025 | 0.0004 | 0.0002 | 2.1e-37 |
 | 03_shap_plus_huim | 01b_baseline_matched_training | 02_2020_train | XGBoost | 1.0 | 3 | +0.0001 | 0.0009 | 0.0002 | 0.093 |
 | 03_shap_plus_huim | 02_shap_only | 01_2024_baseline | AutoInt | 0.1 | 3 | -0.0136 | 0.0058 | 0.0002 | 0 |
-| 03_shap_plus_huim | 02_shap_only | 01_2024_baseline | AutoInt | 1.0 | 1 | -0.0072 |  | 0.0002 | 9.9e-270 |
+| 03_shap_plus_huim | 02_shap_only | 01_2024_baseline | AutoInt | 1.0 | 3 | -0.0039 | 0.0028 | 0.0002 | 9e-31 |
 | 03_shap_plus_huim | 02_shap_only | 01_2024_baseline | CatBoost | 0.1 | 3 | -0.0015 | 0.0010 | 0.0001 | 3.6e-10 |
 | 03_shap_plus_huim | 02_shap_only | 01_2024_baseline | CatBoost | 1.0 | 3 | +0.0049 | 0.0003 | 0.0001 | 0 |
 | 03_shap_plus_huim | 02_shap_only | 01_2024_baseline | FTTransformer | 0.1 | 3 | -0.0037 | 0.0028 | 0.0002 | 2.2e-14 |
-| 03_shap_plus_huim | 02_shap_only | 01_2024_baseline | FTTransformer | 1.0 | 1 | -0.0030 |  | 0.0002 | 2.9e-60 |
+| 03_shap_plus_huim | 02_shap_only | 01_2024_baseline | FTTransformer | 1.0 | 3 | -0.0043 | 0.0052 | 0.0002 | 0.22 |
 | 03_shap_plus_huim | 02_shap_only | 01_2024_baseline | LightGBM | 0.1 | 3 | -0.0002 | 0.0003 | 0.0001 | 0.13 |
 | 03_shap_plus_huim | 02_shap_only | 01_2024_baseline | LightGBM | 1.0 | 3 | -0.0006 | 0.0002 | 0.0001 | 6e-18 |
 | 03_shap_plus_huim | 02_shap_only | 01_2024_baseline | MLP | 0.1 | 3 | -0.0007 | 0.0011 | 0.0001 | 0.042 |
-| 03_shap_plus_huim | 02_shap_only | 01_2024_baseline | MLP | 1.0 | 1 | -0.0007 |  | 0.0002 | 1.8e-05 |
+| 03_shap_plus_huim | 02_shap_only | 01_2024_baseline | MLP | 1.0 | 3 | +0.0013 | 0.0034 | 0.0001 | 1.8e-05 |
 | 03_shap_plus_huim | 02_shap_only | 01_2024_baseline | ResNet | 0.1 | 3 | -0.0017 | 0.0049 | 0.0001 | 9.8e-204 |
-| 03_shap_plus_huim | 02_shap_only | 01_2024_baseline | ResNet | 1.0 | 1 | +0.0026 |  | 0.0001 | 5.3e-175 |
+| 03_shap_plus_huim | 02_shap_only | 01_2024_baseline | ResNet | 1.0 | 3 | -0.0078 | 0.0183 | 0.0001 | 4e-136 |
 | 03_shap_plus_huim | 02_shap_only | 01_2024_baseline | XGBoost | 0.1 | 3 | -0.0005 | 0.0005 | 0.0001 | 0.084 |
 | 03_shap_plus_huim | 02_shap_only | 01_2024_baseline | XGBoost | 1.0 | 3 | -0.0007 | 0.0003 | 0.0001 | 2.9e-08 |
 | 03_shap_plus_huim | 02_shap_only | 02_2020_train | AutoInt | 0.1 | 3 | -0.0051 | 0.0027 | 0.0002 | 1.1e-40 |
-| 03_shap_plus_huim | 02_shap_only | 02_2020_train | AutoInt | 1.0 | 1 | +0.0003 |  | 0.0002 | 0.068 |
+| 03_shap_plus_huim | 02_shap_only | 02_2020_train | AutoInt | 1.0 | 3 | +0.0036 | 0.0053 | 0.0002 | 0.068 |
 | 03_shap_plus_huim | 02_shap_only | 02_2020_train | CatBoost | 0.1 | 3 | -0.0007 | 0.0005 | 0.0001 | 0.00051 |
 | 03_shap_plus_huim | 02_shap_only | 02_2020_train | CatBoost | 1.0 | 3 | +0.0219 | 0.0003 | 0.0002 | 0 |
 | 03_shap_plus_huim | 02_shap_only | 02_2020_train | FTTransformer | 0.1 | 3 | -0.0028 | 0.0016 | 0.0002 | 3.2e-19 |
-| 03_shap_plus_huim | 02_shap_only | 02_2020_train | FTTransformer | 1.0 | 1 | -0.0074 |  | 0.0002 | 0 |
+| 03_shap_plus_huim | 02_shap_only | 02_2020_train | FTTransformer | 1.0 | 2 | -0.0910 | 0.1181 | 0.0003 | 0 |
 | 03_shap_plus_huim | 02_shap_only | 02_2020_train | LightGBM | 0.1 | 3 | -0.0001 | 0.0008 | 0.0001 | 0.017 |
 | 03_shap_plus_huim | 02_shap_only | 02_2020_train | LightGBM | 1.0 | 3 | +0.0004 | 0.0002 | 0.0000 | 0.00052 |
 | 03_shap_plus_huim | 02_shap_only | 02_2020_train | MLP | 0.1 | 3 | +0.0026 | 0.0052 | 0.0002 | 0.63 |
-| 03_shap_plus_huim | 02_shap_only | 02_2020_train | MLP | 1.0 | 1 | +0.0073 |  | 0.0002 | 0 |
+| 03_shap_plus_huim | 02_shap_only | 02_2020_train | MLP | 1.0 | 3 | +0.0087 | 0.0034 | 0.0002 | 0 |
 | 03_shap_plus_huim | 02_shap_only | 02_2020_train | ResNet | 0.1 | 3 | +0.0040 | 0.0084 | 0.0001 | 0.2 |
-| 03_shap_plus_huim | 02_shap_only | 02_2020_train | ResNet | 1.0 | 1 | -0.0127 |  | 0.0002 | 0 |
+| 03_shap_plus_huim | 02_shap_only | 02_2020_train | ResNet | 1.0 | 3 | -0.0109 | 0.0021 | 0.0002 | 0 |
 | 03_shap_plus_huim | 02_shap_only | 02_2020_train | XGBoost | 0.1 | 3 | +0.0000 | 0.0002 | 0.0001 | 0.13 |
 | 03_shap_plus_huim | 02_shap_only | 02_2020_train | XGBoost | 1.0 | 3 | +0.0002 | 0.0010 | 0.0001 | 4.6e-32 |

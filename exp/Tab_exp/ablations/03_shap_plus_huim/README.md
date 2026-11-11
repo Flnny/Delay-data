@@ -52,9 +52,15 @@ without patterns), seed-matched:
 - Against all features (01b): MLP / ResNet gain, but that gain comes from the SHAP
   selection (02); AutoInt and FT-Transformer are 0.005–0.009 below, the GBDTs
   0.002–0.010 below.
-- With all of train in the final fit (GBDTs, 3 seeds), Δ HUIM stays ~0 for XGBoost and
-  LightGBM; CatBoost gains +0.022 over 02, but 02 is unusually weak for CatBoost — against
-  all features (01b, 0.677) 03 reaches 0.678.
+- With all of train in the final fit (3 seeds), Δ HUIM is +0.009 (MLP), +0.004 (AutoInt),
+  −0.011 (ResNet), ~0 for XGBoost / LightGBM; CatBoost gains +0.022 over 02, but 02 is
+  unusually weak for CatBoost — against all features (01b, 0.677) 03 reaches 0.678.
+- **Incomplete cell:** FT-Transformer with all of train did not train on seed 43 (AUC
+  0.500, validation loss flat at ~0.68 from the first epoch, early-stopped at epoch 6)
+  and stalled on seed 44 (no epoch finished in several hours, on two attempts), while
+  seed 42 trained normally (0.666). Its selected configuration (10 layers, lr 1e-3) looks
+  unstable on the full training set; the cell keeps 2 seeds and is not used for
+  conclusions.
 - Paired DeLong tests: `../aggregate/paired_tests.md`. Seed noise, not test sampling,
   dominates (DeLong SE ≈ 0.0002).
 

@@ -45,9 +45,9 @@ SHAP ranking from the 2020 training days; Δ = 02 − 01b (all features), seed-m
 - Ten features keep almost all the signal of the full feature set.
 - With 10% of train in the final fit, the selection helps the plain MLP (+0.014) but not
   the stronger models.
-- With all of train in the final fit, it helps the deep models (seed 42: FT-Transformer
-  0.674 vs 0.651 on all features, ResNet 0.651 vs 0.610); XGBoost is unchanged at
-  ~0.683 (3 seeds).
+- With all of train in the final fit (3 seeds) it lifts every deep model above all
+  features: FT-Transformer 0.674 vs 0.651, ResNet 0.647 vs 0.618, MLP 0.625 vs 0.601,
+  AutoInt 0.667 vs 0.663; XGBoost is unchanged at 0.683.
 
 ### Ranking from another year (2024)
 
